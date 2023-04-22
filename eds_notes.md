@@ -10,10 +10,10 @@ I wrote a [script to restrict the database to the train id of a given cohort](ht
 ## 2. Generate training data for CEHR-BERT
 
 Checking what does `/spark_apps/generate_training_data.py::main`
-- preprocess_domain_table: I deactivated the rollup, so it does nothing but force the colnames to lower
+- `preprocess_domain_table`: I deactivated the rollup, so it does nothing but force the colnames to lower
 - I force datetime conversion from string since pyspark is super null for this task... 
 - Then it produces event tables with `join_domain_tables`, then it joins person and domain tables
-- `create_sequence_data_with_att` creates the sequences : TODO:
+- `create_sequence_data_with_att` creates the sequences : I had to make sure the datetime are well converted from string to datetime. It returned empty dataframe.
 
 The command on eds should be 
 ```console
