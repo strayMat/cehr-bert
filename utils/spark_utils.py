@@ -98,16 +98,17 @@ def preprocess_domain_table(spark, input_folder, domain_table_name, with_rollup=
     domain_table = domain_table.select(
         [F.col(f_n).alias(f_n.lower()) for f_n in domain_table.schema.fieldNames()])
 
-    # Always roll up the drug concepts to the ingredient level
-    if domain_table_name == 'drug_exposure' \
-            and path.exists(create_file_path(input_folder, 'concept')) \
-            and path.exists(create_file_path(input_folder, 'concept_ancestor')):
-        concept = spark.read.parquet(create_file_path(input_folder, 'concept'))
-        concept_ancestor = spark.read.parquet(
-            create_file_path(input_folder, 'concept_ancestor'))
-        domain_table = roll_up_to_drug_ingredients(domain_table, concept, concept_ancestor)
 
     if with_rollup:
+        # eds-modified: (not) always roll up the drug concepts to the ingredient level
+        if domain_table_name == 'drug_exposure' \
+                and path.exists(create_file_path(input_folder, 'concept')) \
+                and path.exists(create_file_path(input_folder, 'concept_ancestor')):
+            concept = spark.read.parquet(create_file_path(input_folder, 'concept'))
+            concept_ancestor = spark.read.parquet(
+                create_file_path(input_folder, 'concept_ancestor'))
+            domain_table = roll_up_to_drug_ingredients(domain_table, concept, concept_ancestor)
+
         if domain_table_name == 'condition_occurrence' \
                 and path.exists(create_file_path(input_folder, 'concept')) \
                 and path.exists(create_file_path(input_folder, 'concept_relationship')):
