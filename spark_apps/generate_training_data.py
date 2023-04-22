@@ -64,8 +64,8 @@ def main(
             )
         )
     else:
-        visit_occurrence_person = visit_occurrence.join(person, "person_id")
-
+        # eds-modified: visit_occurrence_person alreadty exists
+        # visit_occurrence_person = visit_occurrence.join(person, "person_id")
         patient_event = (
             patient_event.join(visit_occurrence_person, "visit_occurrence_id")
             .select(

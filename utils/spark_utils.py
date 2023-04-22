@@ -9,21 +9,26 @@ from utils.logging_utils import *
 PERSON = "person"
 VISIT_OCCURRENCE = "visit_occurrence"
 
+# eds-modified: change the columns names to match those of eds
 DOMAIN_KEY_FIELDS = {
     "condition_occurrence_id": (
-        "condition_concept_id",
-        "condition_start_date",
+        "condition_source_value",
+        "condition_start_datetime",
         "condition",
     ),
     "procedure_occurrence_id": (
-        "procedure_concept_id",
-        "procedure_date",
+        "procedure_source_value",
+        "procedure_datetime",
         "procedure",
     ),
-    "drug_exposure_id": ("drug_concept_id", "drug_exposure_start_date", "drug"),
+    "drug_exposure_id": (
+        "drug_class_source_value",  # ATC code
+        "drug_exposure_start_datetime",
+        "drug",
+    ),
     "measurement_id": (
-        "measurement_concept_id",
-        "measurement_date",
+        "measurement_source_value",  # A bit noisy: looks like free text
+        "measurement_datetime",
         "measurement",
     ),
 }
