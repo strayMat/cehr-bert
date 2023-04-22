@@ -11,5 +11,14 @@ I wrote a [script to restrict the database to the train id of a given cohort](ht
 
 Checking what does `/spark_apps/generate_training_data.py::main`
 - preprocess_domain_table: I deactivated the rollup, so it does nothing but force the colnames to lower
+- I force datetime conversion from string since pyspark is super null for this task... 
 - Then it produces event tables with `join_domain_tables`, then it joins person and domain tables
 - `create_sequence_data_with_att` creates the sequences : TODO:
+
+The command on eds should be 
+```console
+cohort_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+input_dir=$cohort_dir"cehr_bert_train"
+output_dir=$cohort_dir"cehr_bert_sequences"
+PYTHONPATH=./: spark-submit spark_apps/generate_training_data.py -i $input_dir -o $output_dir -tc condition_occurrence procedure_occurrence drug_exposure -d 2017-06-01 --is_new_patient_representation -iv 
+```
