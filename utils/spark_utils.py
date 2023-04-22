@@ -124,9 +124,9 @@ def preprocess_domain_table(
         ]
     )
     # eds-modified: Force datetime conversion from string
-    for col in condition.columns:
+    for col in domain_table.columns:
         if col.find("datetime") != -1:
-            condition = condition.withColumn(
+            domain_table = domain_table.withColumn(
                 col, F.to_timestamp(F.col(col), format="yyyy-MM-dd HH:mm:ss")
             )
 
