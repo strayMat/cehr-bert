@@ -84,9 +84,6 @@ def main(
                 ),
             )
         )
-        patient_event.write.mode("overwrite").parquet(
-            os.path.join(output_folder, "event")
-        )
     if is_new_patient_representation:
         sequence_data = create_sequence_data_with_att(
             patient_event,
