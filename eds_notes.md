@@ -38,4 +38,31 @@ output_dir=$cohort_dir"cehr_bert_pretrained"
 ```
 
 CPU: should work as is.
-GPU: Waiting access
+GPU: Waiting EDS access
+
+## 4. Generate next visit icd10 chapter prediction task
+
+### Use the medem code to create an event cohort
+
+- you should obtain a folder with two dataframes:
+ - a person : static informations (sex, ) and task specific information (followup_start, y).
+ - an event dataframe: events only present in the observation period for the predictive task
+- use the dedicated functions for the eds: `spark_apps.prediction_cohorts.from_eds_stored_cohort.py::create_cohort_from_eds_eventCohort`. The command should looks like: 
+
+```console
+
+```
+
+### Matthieu's note
+
+The code of cert-behrt for cohort creation is difficult to read: too many
+arguments, mix between sql and spark.
+Q: 
+- What is the `cohort_member_id` in `spark_apps/cohorts/spark_app_base.py::NestedCohortBuilder.cohort_member_id`, is it important ? It is a rank over person_id, index_date and visit_occurrence_id. In my case, it can be the person_id, since I am only considering one visit per person. 
+- Why not including visit types in the fine tuning task (option -iv) ? Maybe because it only
+  serves as a pretraining task in addition to the MLM task.
+
+- In the hf_readmission samples that they give, there is the following columns in addition to the patient_sequence used for pretraining: `['gender_concept_id', 'race_concept_id', 'index_date', 'visit_occurrence_id', 'label', 'age']`. These are all statics that I can populate, then join to the sequences using the `utils.spark_utils.py::create_sequence_data_with_att`. 
+
+
+### 5. Fine-tune CEHR-BERT for hf readmission
