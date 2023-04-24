@@ -125,3 +125,7 @@ if __name__ == "__main__":
         help="The path for your output_folder",
         required=True,
     )
+    args = parser.parse_args()
+    create_cohort_from_eds_eventCohort(
+        input_folder=args.input_folder, output_folder=args.output_folder
+    )
