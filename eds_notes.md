@@ -5,7 +5,7 @@ our use case on the APHP eds.
 
 ## 1. Download OMOP tables as parquet files
 
-I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy  in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence)
+I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence)
 
 ## 2. Generate training data for CEHR-BERT
 
@@ -38,7 +38,7 @@ output_dir=$cohort_dir"cehr_bert_pretrained"
 ```
 
 CPU: should work as is.
-GPU: Waiting EDS access
+GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. 
 
 ## 4. Generate next visit icd10 chapter prediction task
 
