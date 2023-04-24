@@ -75,13 +75,6 @@ def create_cohort_from_eds_eventCohort(
         .withColumn("cohort_member_id", F.col("person_id"))
         .withColumn("race_concept_id", F.lit(0))
         .withColumn("index_date", F.col(COLNAME_FOLLOWUP_START))
-        .withColumn(
-            "age",
-            F.ceil(
-                F.months_between(F.col("date"), F.col("birth_datetime"))
-                / F.lit(12)
-            ),
-        )
         .select(
             "person_id",
             "cohort_member_id",
@@ -89,24 +82,34 @@ def create_cohort_from_eds_eventCohort(
             "race_concept_id",
             "birth_datetime",
             F.col(COLNAME_OUTCOME).alias("label"),
-            "age",
         )
     )
     patient_ehr_records = target_w_statics.join(
         event_w_subset_columns, on="person_id", how="inner"
     )
-
+    patient_ehr_records_w_age = patient_ehr_records.withColumn(
+        "age",
+        F.ceil(
+            F.months_between(F.col("date"), F.col("birth_datetime")) / F.lit(12)
+        ),
+    )
     # TODO: right now, I dont't extract visit type, but it should not be
     # important, since it seems to be used only for the pretraining.
     # If necessary, a join with the visit_occurrence table is necessary.
     cohort_sequence = create_sequence_data_with_att(
-        patient_ehr_records,
+        patient_ehr_records_w_age,
         include_visit_type=False,
         exclude_visit_tokens=False,
     )
     # add target and demographics
     cohort_sequence_target = target_w_statics.join(
         cohort_sequence, on=["person_id", "cohort_member_id"], how="inner"
+    ).withColumn(
+        "age",
+        F.ceil(
+            F.months_between(F.col("index_date"), F.col("birth_datetime"))
+            / F.lit(12)
+        ),
     )
     cohort_sequence_target.write.mode("overwrite").parquet(str(output_folder))
 
