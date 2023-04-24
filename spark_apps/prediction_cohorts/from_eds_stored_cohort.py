@@ -180,7 +180,7 @@ if __name__ == "__main__":
         default=None,
     )
     args = parser.parse_args()
-    create_cohort_from_eds_eventCohort(
+    create_cohort_from_eds_eventCohort_dir(
         input_folder=args.input_folder,
         output_folder=args.output_folder,
         train_test_split_folder=args.train_test_split_folder,

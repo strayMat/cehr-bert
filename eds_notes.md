@@ -52,6 +52,7 @@ GPU: Waiting EDS access
 ```console
 input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
 output_dir=$input_dir"cehr_bert_finetuning_sequences"
+train_datasplit_dir=$input_dir"hospital_split.parquet"
 
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir
 ```
