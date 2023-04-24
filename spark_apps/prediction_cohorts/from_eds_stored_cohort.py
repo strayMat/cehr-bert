@@ -1,8 +1,10 @@
 import argparse
+import logging
 from pathlib import Path
 from typing import List
 import pandas as pd
 from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame
 from utils.spark_utils import create_sequence_data_with_att, extract_ehr_records
 import pyspark.sql.functions as F
 
@@ -15,14 +17,11 @@ COLNAME_OUTCOME = "y"
 COLNAME_FOLLOWUP_START = "followup_start"
 
 
-def create_cohort_from_eds_eventCohort(
-    input_folder: str, output_folder: str, path2train_split: str = None
+def create_cohort_from_eds_eventCohort_dir(
+    input_folder: str, output_folder: str, train_test_split_folder: str = None
 ):
-    """
-    From a [EventCohort](), create the sequence of events necessary for cerh-bert
+    """From a [EventCohort](), create the sequence of events necessary for cerh-bert
     fine tuning prediction tasks.
-
-    TODO: Only support binary label right now.
 
     NB: the loaded events should be only those in the observation period for the
     predictive tasks.
@@ -42,17 +41,54 @@ def create_cohort_from_eds_eventCohort(
     # extract the events the input folder containing the events parquet.
     # The events should be only the one in the observation period.
     event = spark.read.parquet(str(input_folder_path / "event.parquet"))
-    target = spark.read.parquet(str(input_folder_path / "person.parquet"))
-    if path2train_split is not None:
-        train_split_dataset = pd.read_parquet(path2train_split)
-        train_ids = train_split_dataset.loc[
-            train_split_dataset["dataset"] == "train"
-        ]["person_id"]
-        target = target.join(
-            spark.createDataFrame(train_ids),
-            on="person_id",
-            how="inner",
+    person = spark.read.parquet(str(input_folder_path / "person.parquet"))
+
+    if train_test_split_folder is not None:
+        train_split_dataset = pd.read_parquet(train_test_split_folder)
+        for split_name in train_split_dataset["dataset"].unique():
+            split_ids = train_split_dataset.loc[
+                train_split_dataset["dataset"] == split_name
+            ]["person_id"]
+            split_person = person.join(
+                spark.createDataFrame(split_ids),
+                on="person_id",
+                how="inner",
+            )
+            split_event = event.join(
+                spark.createDataFrame(split_ids),
+                on="person_id",
+                how="inner",
+            )
+            split_cohort_sequence_target = create_cohort_from_eds_eventCohort(
+                person=split_person, event=split_event
+            )
+            split_cohort_sequence_target.write.mode("overwrite").parquet(
+                str(output_folder) + f"_{split_name}"
+            )
+
+    else:
+        cohort_sequence_target = create_cohort_from_eds_eventCohort(
+            person=person, event=event
         )
+        cohort_sequence_target.write.mode("overwrite").parquet(
+            str(output_folder)
+        )
+
+
+def create_cohort_from_eds_eventCohort(
+    person: DataFrame,
+    event: DataFrame,
+) -> DataFrame:
+    """
+    From person and event, return the sequences for cehr-bert inputs.
+
+    NB: the loaded events should be only those in the observation period for the
+    predictive tasks.
+
+    TODO: Only support binary label right now.
+
+    """
+
     event_w_cols_renamed = event.withColumn(
         "domain", F.col(COLNAME_EVENT_DOMAIN)
     ).withColumn("date", F.to_date(F.col(COLNAME_EVENT_START)))
@@ -64,7 +100,7 @@ def create_cohort_from_eds_eventCohort(
         "domain",
     )
     target_w_statics = (
-        target.withColumn(
+        person.withColumn(
             "gender_concept_id",
             F.when(F.col("gender_source_value") == "m", 8507).otherwise(
                 F.when(F.col("gender_source_value") == "f", 8532).otherwise(
@@ -112,7 +148,7 @@ def create_cohort_from_eds_eventCohort(
             / F.lit(12)
         ),
     )
-    cohort_sequence_target.write.mode("overwrite").parquet(str(output_folder))
+    return cohort_sequence_target
 
 
 if __name__ == "__main__":
@@ -135,7 +171,17 @@ if __name__ == "__main__":
         help="The path for your output_folder",
         required=True,
     )
+    parser.add_argument(
+        "-s",
+        "--train_test_split_folder",
+        dest="train_test_split_folder",
+        action="store",
+        help="The path to the train test split dataframe formatted as ['person_id', 'dataset']",
+        default=None,
+    )
     args = parser.parse_args()
     create_cohort_from_eds_eventCohort(
-        input_folder=args.input_folder, output_folder=args.output_folder
+        input_folder=args.input_folder,
+        output_folder=args.output_folder,
+        train_test_split_folder=args.train_test_split_folder,
     )

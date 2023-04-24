@@ -67,8 +67,7 @@ Q:
 
 - In the hf_readmission samples that they give, there is the following columns in addition to the patient_sequence used for pretraining: `['gender_concept_id', 'race_concept_id', 'index_date', 'visit_occurrence_id', 'label', 'age']`. These are all statics that I can populate, then join to the sequences using the `utils.spark_utils.py::create_sequence_data_with_att`. 
 
-
-### 5. Fine-tune CEHR-BERT for hf readmission
+### 5. Fine-tune CEHR-BERT for a given task
 
 The default mode is to create the folds randomly, I am not sure, it is possible to fine-tune on a population, and transfer on another. 
 TODO: inspect the `is_transfer_learning` parameter.
