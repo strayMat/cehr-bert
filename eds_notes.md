@@ -50,8 +50,8 @@ GPU: Waiting EDS access
 - use the dedicated functions for the eds: `spark_apps.prediction_cohorts.from_eds_stored_cohort.py::create_cohort_from_eds_eventCohort`. The command should looks like: 
 
 ```console
-input_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
-output_dir=$cohort_dir"cehr_bert_finetuning_sequences"
+input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
+output_dir=$input_dir"cehr_bert_finetuning_sequences"
 
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir
 ```
@@ -69,3 +69,22 @@ Q:
 
 
 ### 5. Fine-tune CEHR-BERT for hf readmission
+
+The default mode is to create the folds randomly, I am not sure, it is possible to fine-tune on a population, and transfer on another. 
+TODO: inspect the `is_transfer_learning` parameter.
+
+NB: In the pretrained_dir, it should be a pretrained bert model with the name `bert_model.h5`, a tokenizer and 
+
+```console
+cohort_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
+
+pretrained_dir=$cohort_dir"cehr_bert_pretrained_model"
+sequence_dir=$cohort_dir"cehr_bert_finetuning_sequences"
+# Create the evaluation folder
+evaluation_dir=$cohort_dir"evaluation_train_val_split"
+mkdir -p $evaluation_dir 
+
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/evaluation.py -a sequence_model -sd $sequence_dir -ef $evaluation_dir -m 512 -b 32 -p 10 -vb $pretrained_dir -me vanilla_bert_lstm --sequence_model_name CEHR_BERT_512 --num_of_folds 4;
+```
+
+

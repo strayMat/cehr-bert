@@ -101,8 +101,11 @@ def create_cohort_from_eds_eventCohort(
         include_visit_type=False,
         exclude_visit_tokens=False,
     )
-
-    cohort_sequence.write.mode("overwrite").parquet(str(output_folder))
+    # add target and demographics
+    cohort_sequence_target = target_w_statics.join(
+        cohort_sequence, on=["person_id", "cohort_member_id"], how="inner"
+    )
+    cohort_sequence_target.write.mode("overwrite").parquet(str(output_folder))
 
 
 if __name__ == "__main__":
