@@ -147,7 +147,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
 
         tf.print(f"{self}: The train size is {len(train)}")
         tf.print(f"{self}: The val size is {len(val)}")
-        tf.print(f"{self}: The test size is {len(test_inputs)}")
+        tf.print(f"{self}: The test size is {len(test_labels)}")
 
         training_set = (
             tf.data.Dataset.from_tensor_slices((training_input, labels[train]))
