@@ -48,7 +48,7 @@ def create_cohort_from_eds_eventCohort_dir(
         for split_name in train_split_dataset["dataset"].unique():
             split_ids = train_split_dataset.loc[
                 train_split_dataset["dataset"] == split_name
-            ]["person_id"]
+            ][["person_id"]]
             split_person = person.join(
                 spark.createDataFrame(split_ids),
                 on="person_id",
