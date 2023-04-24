@@ -82,6 +82,7 @@ def create_cohort_from_eds_eventCohort(
             "race_concept_id",
             "birth_datetime",
             F.col(COLNAME_OUTCOME).alias("label"),
+            "index_date",
         )
     )
     patient_ehr_records = target_w_statics.join(
