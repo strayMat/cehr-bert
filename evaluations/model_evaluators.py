@@ -116,12 +116,13 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
                 .sum()
             ) / len(self._dataset)
             if train_prevalence == 0:
-                raise ValueError(f"Target label {self.target_label} not found in training set.")
+                raise ValueError(
+                    f"Target label {self.target_label} not found in training set."
+                )
             else:
                 self.get_logger().warning(
                     f"Target label {self.target_label} has prevalence {train_prevalence} in training set."
                 )
-
 
     def train_model(self, training_data: Dataset, val_data: Dataset):
         """

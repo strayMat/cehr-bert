@@ -43,6 +43,7 @@ if __name__ == "__main__":
             bert_model_path=bert_model_path,
             tokenizer_path=bert_tokenizer_path,
             is_temporal=False,
-            sequence_model_name=args.sequence_model_name,
+            sequence_model_name=args.sequence_model_name
+            + f"__target_{target_}",
             target_label=target_,
         ).train_transfer(test_dataset=test_dataset)
