@@ -28,9 +28,26 @@ if __name__ == "__main__":
         target_counts.to_csv(
             args.evaluation_folder + "/prevalences.csv", index=False
         )
-    for target_ in target_counts["target"].values:
-        # Create model and train/transfer
-        logging.getLogger().info(f"Finetuning for target: {target_}")
+        for target_ in target_counts["target"].values:
+            # Create model and train/transfer
+            logging.getLogger().info(f"Finetuning for target: {target_}")
+            bert_model = BertLstmModelEvaluator(
+                dataset=train_dataset,
+                evaluation_folder=args.evaluation_folder,
+                num_of_folds=args.num_of_folds,
+                is_transfer_learning=False,
+                training_percentage=args.training_percentage,
+                max_seq_length=args.max_seq_length,
+                batch_size=args.batch_size,
+                epochs=args.epochs,
+                bert_model_path=bert_model_path,
+                tokenizer_path=bert_tokenizer_path,
+                is_temporal=False,
+                sequence_model_name=args.sequence_model_name
+                + f"__target_{target_}",
+                target_label=target_,
+            ).train_transfer(test_dataset=test_dataset)
+    else:
         bert_model = BertLstmModelEvaluator(
             dataset=train_dataset,
             evaluation_folder=args.evaluation_folder,
@@ -43,7 +60,6 @@ if __name__ == "__main__":
             bert_model_path=bert_model_path,
             tokenizer_path=bert_tokenizer_path,
             is_temporal=False,
-            sequence_model_name=args.sequence_model_name
-            + f"__target_{target_}",
-            target_label=target_,
+            sequence_model_name=args.sequence_model_name,
+            target_label=None,
         ).train_transfer(test_dataset=test_dataset)

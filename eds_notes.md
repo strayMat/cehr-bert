@@ -38,7 +38,7 @@ output_dir=$cohort_dir"cehr_bert_pretrained"
 ```
 
 CPU: should work as is.
-GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. 
+GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I add to install tensorflow-gpu, but once installed, it worked like a charm (6min).
 
 ## 4. Generate next visit icd10 chapter prediction task
 
