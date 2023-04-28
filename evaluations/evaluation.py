@@ -279,6 +279,13 @@ def create_evaluation_args():
         dest="sequence_model_data_path_test",
         action="store",
     )
+    # eds-modified: add a multi output classifier
+    group.add_argument(
+        "-moc",
+        "--multi_output_classifier",
+        dest="multi_output_classifier",
+        action="store_true",
+    )
     group.add_argument(
         "-smn",
         "--sequence_model_name",

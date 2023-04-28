@@ -84,9 +84,6 @@ def create_cohort_from_eds_eventCohort(
 
     NB: the loaded events should be only those in the observation period for the
     predictive tasks.
-
-    TODO: Only support binary label right now.
-
     """
 
     event_w_cols_renamed = event.withColumn(

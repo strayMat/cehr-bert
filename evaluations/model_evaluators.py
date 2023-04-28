@@ -88,9 +88,16 @@ class AbstractModelEvaluator(AbstractModel):
         pass
 
 
+# eds:modified: accept multiple labels entry in dataset.label, choose one as binary target.
 class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
     def __init__(
-        self, epochs, batch_size, sequence_model_name=None, *args, **kwargs
+        self,
+        epochs,
+        batch_size,
+        sequence_model_name=None,
+        target_label: str = None,
+        *args,
+        **kwargs,
     ):
         self.get_logger().info(
             f"epochs: {epochs}\n"
@@ -101,6 +108,20 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
+        self.target_label = target_label
+        if self.target_label is not None:
+            train_prevalence = (
+                self._dataset.label.apply(lambda x: self.target_label in x)
+                .astype(int)
+                .sum()
+            ) / len(self._dataset)
+            if train_prevalence == 0:
+                raise ValueError(f"Target label {self.target_label} not found in training set.")
+            else:
+                self.get_logger().warning(
+                    f"Target label {self.target_label} has prevalence {train_prevalence} in training set."
+                )
+
 
     def train_model(self, training_data: Dataset, val_data: Dataset):
         """
@@ -369,6 +390,7 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             return model
 
     # eds-modified: add the possibility to leverage an external dataset
+    # eds-modified: allow to transfer to multilabels
     def extract_model_inputs(self, dataset: pd.DataFrame = None):
         if dataset is None:
             dataset_ = self._dataset
@@ -382,6 +404,9 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         ages = dataset_.ages
         visit_concept_orders = dataset_.visit_concept_orders
         labels = dataset_.label
+        # suppose that the label is a list of chapters
+        if self.target_label is not None:
+            labels = labels.apply(lambda x: self.target_label in x).astype(int)
         padded_token_ides = post_pad_pre_truncate(
             token_ids,
             self._tokenizer.get_unused_token_id(),

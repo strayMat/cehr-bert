@@ -50,7 +50,7 @@ GPU: The conda environment seems to miss conda `Could not load dynamic library '
 - use the dedicated functions for the eds: `spark_apps.prediction_cohorts.from_eds_stored_cohort.py::create_cohort_from_eds_eventCohort`. The command should looks like: 
 
 ```console
-input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
+input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 output_dir=$input_dir"cehr_bert_finetuning_sequences"
 train_test_split_folder=$input_dir"hospital_split.parquet"
 
@@ -94,15 +94,18 @@ mkdir -p $evaluation_dir
 The proper setup for a sound evaluation of the model is to pretrain on a train set, then fine tune on the same train set, finally evaluate on an unseen test set. 
 For that, I added a `train_transfer` method for the abstract method `SequenceModelEvaluator`, allowing to train on a train set and transfer to a test set. The corresponding command line script is `evaluations.eds_transfer_evaluation.py` and the command line looks like:
 
+The example below is given for a multi-label classification task. It waits for a list of event in the label column of the sequence dataset. But it should work for binary task if the label column is binary and if the `moc` option is removed.
 ```console
-cohort_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01chap_9/"
+cohort_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 
-pretrained_dir=$cohort_dir"cehr_bert_pretrained_model"
+pretrained_dir=cohort_dir"cehr_bert_pretrained_model"
+
 train_sequence_dir=$cohort_dir"cehr_bert_finetuning_sequences_train"
 test_sequence_dir=$cohort_dir"cehr_bert_finetuning_sequences_external_test"
 # Create the evaluation folder
 evaluation_dir=$cohort_dir"evaluation_train_val_split"
 mkdir -p $evaluation_dir 
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_transfer_evaluation.py -a sequence_model -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -m 512 -b 32 -p 10 -vb $pretrained_dir -me vanilla_bert_lstm --sequence_model_name CEHR_BERT_512 --num_of_folds 4;
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_transfer_evaluation.py -a sequence_model -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -m 512 -b 32 -p 10 -vb $pretrained_dir -me vanilla_bert_lstm --sequence_model_name CEHR_BERT_512
+-moc
 ```
