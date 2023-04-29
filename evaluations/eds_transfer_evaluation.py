@@ -28,7 +28,11 @@ if __name__ == "__main__":
         target_counts.to_csv(
             args.evaluation_folder + "/prevalences.csv", index=False
         )
-        for target_ in target_counts["target"].values:
+        if args.target_label is not None:
+            targets_to_run = [args.target_label]
+        else:
+            targets_to_run = target_counts["target"].values
+        for target_ in targets_to_run:
             # Create model and train/transfer
             logging.getLogger().info(f"Finetuning for target: {target_}")
             bert_model = BertLstmModelEvaluator(

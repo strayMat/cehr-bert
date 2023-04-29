@@ -287,6 +287,13 @@ def create_evaluation_args():
         action="store_true",
     )
     group.add_argument(
+        "-tl",
+        "--target_label",
+        dest="target_label",
+        action="store",
+        default=None,
+    )
+    group.add_argument(
         "-smn",
         "--sequence_model_name",
         dest="sequence_model_name",
