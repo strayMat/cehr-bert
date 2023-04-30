@@ -5,8 +5,6 @@ from sklearn.model_selection import ParameterGrid
 
 GRID_RANDOM_SEED = list(range(0, 5))
 
-GRID_RANDOM_SEED = [0]
-
 PARAMETER_GRID = ParameterGrid(
     {"random_seed": GRID_RANDOM_SEED, "target_label": ["2"]}
 )
