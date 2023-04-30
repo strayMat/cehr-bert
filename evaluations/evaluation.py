@@ -286,6 +286,14 @@ def create_evaluation_args():
         dest="multi_output_classifier",
         action="store_true",
     )
+    # eds-modified: add random seed
+    group.add_argument(
+        "-rs",
+        "--random_seed",
+        dest="random_seed",
+        action="store",
+        type=int,
+    )
     group.add_argument(
         "-tl",
         "--target_label",

@@ -35,6 +35,7 @@ if __name__ == "__main__":
         for target_ in targets_to_run:
             # Create model and train/transfer
             logging.getLogger().info(f"Finetuning for target: {target_}")
+            tf.keras.utils.set_random_seed(args.random_seed)
             bert_model = BertLstmModelEvaluator(
                 dataset=train_dataset,
                 evaluation_folder=args.evaluation_folder,
