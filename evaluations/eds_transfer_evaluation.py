@@ -3,7 +3,7 @@ import spark_apps.parameters as p
 from evaluations.model_evaluators import *
 from sklearn.model_selection import ParameterGrid
 
-GRID_RANDOM_SEED = list(range(2))
+GRID_RANDOM_SEED = list(range(0, 0))
 
 PARAMETER_GRID = ParameterGrid(
     {"random_seed": GRID_RANDOM_SEED, "target_label": ["2"]}
@@ -43,7 +43,7 @@ if __name__ == "__main__":
             random_seed_ = parameters["random_seed"]
             # Create model and train/transfer
             logging.getLogger().info(
-                f"Finetuning for target: {target_}, seed={random_seed_}"
+                f"\nFinetuning for target={target_}, seed={random_seed_}"
             )
             bert_model = BertLstmModelEvaluator(
                 dataset=train_dataset,
