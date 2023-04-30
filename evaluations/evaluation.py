@@ -293,6 +293,7 @@ def create_evaluation_args():
         dest="random_seed",
         action="store",
         type=int,
+        default=42,
     )
     group.add_argument(
         "-tl",

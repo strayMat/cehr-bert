@@ -2,6 +2,7 @@ from evaluations.evaluation import create_evaluation_args
 import spark_apps.parameters as p
 from evaluations.model_evaluators import *
 
+
 if __name__ == "__main__":
     args = create_evaluation_args().parse_args()
     assert hasattr(args, "sequence_model_data_path_test")
@@ -35,7 +36,7 @@ if __name__ == "__main__":
         for target_ in targets_to_run:
             # Create model and train/transfer
             logging.getLogger().info(f"Finetuning for target: {target_}")
-            tf.keras.utils.set_random_seed(args.random_seed)
+            set_seed(args.random_seed)
             bert_model = BertLstmModelEvaluator(
                 dataset=train_dataset,
                 evaluation_folder=args.evaluation_folder,
@@ -49,7 +50,7 @@ if __name__ == "__main__":
                 tokenizer_path=bert_tokenizer_path,
                 is_temporal=False,
                 sequence_model_name=args.sequence_model_name
-                + f"__target_{target_}",
+                + f"__target_{target_}__rs_{args.random_seed}",
                 target_label=target_,
             ).train_transfer(test_dataset=test_dataset)
     else:
