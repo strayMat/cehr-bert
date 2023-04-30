@@ -177,7 +177,9 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         if self._training_percentage < 1:
             size = int(len(labels) * self._training_percentage)
             train_val_ix = np.random.choice(train_val_ix, size, replace=False)
-        train, val = train_test_split(train_val_ix)
+        train, val = train_test_split(
+            train_val_ix, random_state=self._random_seed
+        )
         training_input = {k: v[train] for k, v in inputs.items()}
         val_input = {k: v[val] for k, v in inputs.items()}
 

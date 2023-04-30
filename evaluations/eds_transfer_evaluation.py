@@ -5,7 +5,7 @@ from sklearn.model_selection import ParameterGrid
 
 GRID_RANDOM_SEED = list(range(0, 5))
 
-GRID_RANDOM_SEED = [0, 0]
+GRID_RANDOM_SEED = [0]
 
 PARAMETER_GRID = ParameterGrid(
     {"random_seed": GRID_RANDOM_SEED, "target_label": ["2"]}
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             random_seed_ = parameters["random_seed"]
             # Create model and train/transfer
             logging.getLogger().info(
-                f"\nFinetuning for target={target_}, seed={random_seed_}"
+                f"Finetuning for 🎯={target_}, 🌱={random_seed_}"
             )
             bert_model = BertLstmModelEvaluator(
                 dataset=train_dataset,
