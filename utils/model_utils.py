@@ -121,6 +121,7 @@ def compute_binary_metrics(
     model,
     test_data: Union[Dataset, Tuple[np.ndarray, np.ndarray]],
     metrics_folder,
+    **kwargs,
 ):
     """
     Compute Recall, Precision, F1-score and PR-AUC for the test data
@@ -176,6 +177,8 @@ def compute_binary_metrics(
         "pr_auc": [pr_auc],
         "roc_auc": [roc_auc],
     }
+    for k, v in kwargs.items():
+        data_metrics[k] = [v]
 
     pd.DataFrame(data_metrics).to_parquet(
         os.path.join(metrics_folder, f"{current_time}.parquet")

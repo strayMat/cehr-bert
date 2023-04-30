@@ -96,6 +96,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         batch_size,
         sequence_model_name=None,
         target_label: str = None,
+        random_seed: int = 42,
         *args,
         **kwargs,
     ):
@@ -108,20 +109,22 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
-        self.target_label = target_label
-        if self.target_label is not None:
+        self._random_seed = random_seed
+        set_seed(self._random_seed)
+        self._target_label = target_label
+        if self._target_label is not None:
             train_prevalence = (
-                self._dataset.label.apply(lambda x: self.target_label in x)
+                self._dataset.label.apply(lambda x: self._target_label in x)
                 .astype(int)
                 .sum()
             ) / len(self._dataset)
             if train_prevalence == 0:
                 raise ValueError(
-                    f"Target label {self.target_label} not found in training set."
+                    f"Target label {self._target_label} not found in training set."
                 )
             else:
                 self.get_logger().warning(
-                    f"Target label {self.target_label} has prevalence {train_prevalence} in training set."
+                    f"Target label {self._target_label} has prevalence {train_prevalence} in training set."
                 )
 
     def train_model(self, training_data: Dataset, val_data: Dataset):
@@ -155,7 +158,14 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._model = self._create_model()
         self.train_model(train, val)
         compute_binary_metrics(
-            self._model, test, self.get_model_metrics_folder()
+            self._model,
+            test,
+            self.get_model_metrics_folder(),
+            **{
+                "random_seed": self._random_seed,
+                "target_label": self._target_label,
+                "training_percentage": self._training_percentage,
+            },
         )
 
     # eds-modified: get the train, val and test sets for an unseen and fixed (even during
@@ -356,7 +366,6 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         self._bert_model_path = bert_model_path
         self._tokenizer = pickle.load(open(tokenizer_path, "rb"))
         self._is_temporal = is_temporal
-
         self.get_logger().info(
             f"max_seq_length: {max_seq_length}\n"
             f"vanilla_bert_model_path: {bert_model_path}\n"
@@ -410,8 +419,8 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         visit_concept_orders = dataset_.visit_concept_orders
         labels = dataset_.label
         # suppose that the label is a list of chapters
-        if self.target_label is not None:
-            labels = labels.apply(lambda x: self.target_label in x).astype(int)
+        if self._target_label is not None:
+            labels = labels.apply(lambda x: self._target_label in x).astype(int)
         padded_token_ides = post_pad_pre_truncate(
             token_ids,
             self._tokenizer.get_unused_token_id(),
