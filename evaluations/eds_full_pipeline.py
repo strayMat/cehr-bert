@@ -85,7 +85,7 @@ def main(pipeline_config):
             )
 
         path2effective_train_sequences = Path(
-            pipeline_config.parquet_data_path + f"_effective_train"
+            pretrain_config.parquet_data_path + f"_effective_train"
         )
         shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
         effective_train_sequences.to_parquet(path2effective_train_sequences)
