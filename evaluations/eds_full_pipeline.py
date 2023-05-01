@@ -134,7 +134,14 @@ def main(pipeline_config):
         bert_tokenizer_path = os.path.join(
             pipeline_config.output_folder, p.tokenizer_path
         )
-        # train_dataset = pd.read_parquet(path2effective_train_sequences)
+        train_dataset = pd.read_parquet(
+            pipeline_config.sequence_model_data_path
+        )
+        effective_train_dataset = train_dataset.loc[
+            train_dataset["person_id"].isin(
+                effective_train_sequences["person_id"].values
+            )
+        ]
         test_dataset = pd.read_parquet(
             pipeline_config.sequence_model_data_path_test
         )
@@ -151,7 +158,7 @@ def main(pipeline_config):
             )
             bert_model = BertLstmModelEvaluator(
                 bert_model_path=evaluation_pretrain_model_path,
-                dataset=effective_train_sequences,
+                dataset=effective_train_dataset,
                 evaluation_folder=pipeline_config.evaluation_folder,
                 num_of_folds=1,
                 is_transfer_learning=False,
@@ -176,6 +183,13 @@ def create_parse_args_pipeline_evaluation():
         "-sdt",
         "--sequence_model_data_path_test",
         dest="sequence_model_data_path_test",
+        action="store",
+        required=True,
+    )
+    pretrain_args.add_argument(
+        "-sd",
+        "--sequence_model_data_path",
+        dest="sequence_model_data_path",
         action="store",
         required=True,
     )
