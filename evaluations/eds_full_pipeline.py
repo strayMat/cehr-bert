@@ -206,7 +206,7 @@ def create_parse_args_pipeline_evaluation():
     # I removed all required argument from the evaluation config.
     setattr(pipeline_config, "action", SEQUENCE_MODEL)
     # setattr(pipeline_config, "evaluation_depth", 5) # only used if using random bert
-    setattr(pipeline_config, "evaluation_batch_size", 128)
+    setattr(pipeline_config, "evaluation_batch_size", 32)
     setattr(pipeline_config, "evaluation_epochs", 10)
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
     return pipeline_config
