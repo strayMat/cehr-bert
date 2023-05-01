@@ -90,6 +90,9 @@ def main(pipeline_config):
         if path2effective_train_sequences.exists():
             shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
         effective_train_sequences.to_parquet(path2effective_train_sequences)
+        evaluation_pretrain_model_path = str(
+            Path(pipeline_config.output_folder) / p.bert_model_validation_path
+        )
         if not pipeline_config.skip_pretraining:
             VanillaBertTrainer(
                 training_data_parquet_path=str(path2effective_train_sequences),
@@ -122,10 +125,6 @@ def main(pipeline_config):
             folder_list.sort()
             last_pretrain_model_path = str(
                 Path(pipeline_config.output_folder) / folder_list[-1]
-            )
-            evaluation_pretrain_model_path = str(
-                Path(pipeline_config.output_folder)
-                / p.bert_model_validation_path
             )
             if Path(evaluation_pretrain_model_path).exists():
                 Path(evaluation_pretrain_model_path).unlink()
