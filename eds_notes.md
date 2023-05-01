@@ -109,3 +109,6 @@ mkdir -p $evaluation_dir
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_transfer_evaluation.py -a sequence_model -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -m 512 -b 32 -p 10 -vb $pretrained_dir -me vanilla_bert_lstm --sequence_model_name CEHR_BERT_512
 -moc
 ```
+
+## 6. Evaluate the pipeline (pretrain + finetuning)
+

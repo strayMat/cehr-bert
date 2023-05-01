@@ -46,46 +46,50 @@ ICD10_CHAPTERS = [
 ]
 ICD10_CHAPTERS = ["2"]
 
-GRID_RANDOM_SEED = list(range(0, 5))
+GRID_RANDOM_SEED = list(range(0, 2))
+GRID_PERCENTAGE = [
+    0.1,
+]  # 0.25, 0.5, 0.9, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
         "random_seed": GRID_RANDOM_SEED,
         # "target_label": ["2"],
-        "train_percentage": [0.1, 0.25, 0.5, 0.9, 1],
+        "train_percentage": GRID_PERCENTAGE,
     }
 )
 
 
-def main(pretrain_config, evaluation_config):
+def main(pipeline_config):
     for run_config in PARAMETER_GRID:
         # set paths
         random_seed_ = run_config["random_seed"]
         pretrain_percentage_ = run_config["train_percentage"]
         # maybe doublon because it is set in both models
         set_seed(random_seed_)
-        # create the sequence data from the full data.
+        # create the effective train set from the sfull sequence data.
         # Do this with subsetting the existing sequences from the full train data.
-        full_sequences = pd.read_parquet(pretrain_config.parquet_data_path)
+        full_sequences = pd.read_parquet(pipeline_config.parquet_data_path)
         if pretrain_percentage_ < 1:
             train, _ = train_test_split(
                 np.arange(len(full_sequences)),
                 train_size=pretrain_percentage_,
                 random_state=random_seed_,
             )
-            train_sequences = full_sequences.iloc[train]
+            effective_train_sequences = full_sequences.iloc[train]
         else:
-            train_sequences = full_sequences.sample(
+            effective_train_sequences = full_sequences.sample(
                 frac=1.0, random_state=random_seed_
             )
 
-        path2train_sequences = Path(
-            pretrain_config.parquet_data_path + f"_effective_train"
+        path2effective_train_sequences = Path(
+            pipeline_config.parquet_data_path + f"_effective_train"
         )
-        shutil.rmtree(path2train_sequences, ignore_errors=True)
-        train_sequences.to_parquet(path2train_sequences)
+        shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
+        effective_train_sequences.to_parquet(path2effective_train_sequences)
+        pretrain_config = create_bert_model_config(pipeline_config)
         VanillaBertTrainer(
-            training_data_parquet_path=pretrain_config.parquet_data_path,
+            training_data_parquet_path=str(path2effective_train_sequences),
             model_path=pretrain_config.model_path,
             tokenizer_path=pretrain_config.tokenizer_path,
             visit_tokenizer_path=pretrain_config.visit_tokenizer_path,
@@ -109,25 +113,30 @@ def main(pretrain_config, evaluation_config):
         # default name taken by the evaluator.
         folder_list = [
             f_name.name
-            for f_name in Path(pretrain_config.model_path).iterdir()
+            for f_name in Path(pretrain_config.output_folder).iterdir()
             if f_name.name.find(".h5") != -1
         ]
         folder_list.sort()
-        last_model_name = folder_list[-1]
+        last_pretrain_model_path = str(
+            Path(pretrain_config.output_folder) / folder_list[-1]
+        )
+        evaluation_pretrain_model_path = str(
+            Path(pretrain_config.output_folder) / p.bert_model_validation_path
+        )
+        shutil.rmtree(evaluation_pretrain_model_path)
         shutil.copyfile(
-            str(Path(pretrain_config.model_path) / last_model_name),
-            str(Path(pretrain_config.model_path) / "bert_model.h5"),
+            last_pretrain_model_path, evaluation_pretrain_model_path
         )
         # Fine tune and evaluate:
-        bert_tokenizer_path = os.path.join(bert_model_path, p.tokenizer_path)
-        bert_model_path = os.path.join(
-            bert_model_path, p.bert_model_validation_path
+        bert_tokenizer_path = os.path.join(
+            pipeline_config.output_folder, p.tokenizer_path
         )
-        evaluator_config = create_evaluation_args().parse_args()
-        train_dataset = pd.read_parquet(path2train_sequences)
-        test_dataset = pd.read_parquet(args.sequence_model_data_path_test)
+        # train_dataset = pd.read_parquet(path2effective_train_sequences)
+        test_dataset = pd.read_parquet(
+            pipeline_config.sequence_model_data_path_test
+        )
         available_targets_counts = np.unique(
-            np.hstack(train_dataset["label"].values)
+            np.hstack(effective_train_sequences["label"].values)
         )
 
         targets_to_run = [
@@ -138,43 +147,75 @@ def main(pretrain_config, evaluation_config):
                 f"Finetuning for 🎯={target_}, 🌱={random_seed_}"
             )
             bert_model = BertLstmModelEvaluator(
-                dataset=train_dataset,
-                evaluation_folder=evaluator_config.evaluation_folder,
-                num_of_folds=evaluator_config.num_of_folds,
+                bert_model_path=evaluation_pretrain_model_path,
+                dataset=effective_train_sequences,
+                evaluation_folder=pipeline_config.evaluation_folder,
+                num_of_folds=1,
                 is_transfer_learning=False,
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
                 training_percentage=pretrain_percentage_,
-                max_seq_length=evaluator_config.max_seq_length,
-                batch_size=evaluator_config.batch_size,
-                epochs=evaluator_config.epochs,
-                bert_model_path=bert_model_path,
+                max_seq_length=pipeline_config.evaluation_max_seq_length,
+                batch_size=pipeline_config.evaluation_batch_size,
+                epochs=pipeline_config.evaluation_epochs,
                 tokenizer_path=bert_tokenizer_path,
                 is_temporal=False,
-                sequence_model_name=evaluator_config.sequence_model_name
+                sequence_model_name=pipeline_config.sequence_model_name
                 + f"__target_{target_}",
                 target_label=target_,
                 random_seed=random_seed_,
             ).train_transfer(test_dataset=test_dataset)
 
 
-if __name__ == "__main__":
-    pretrain_config = create_bert_model_config(
-        create_parse_args_base_bert().parse_args()
+def create_parse_args_pipeline_evaluation():
+    pretrain_args = create_parse_args_base_bert()
+    pretrain_args.add_argument(
+        "-sdt",
+        "--sequence_model_data_path_test",
+        dest="sequence_model_data_path_test",
+        action="store",
+        required=True,
     )
+    pretrain_args.add_argument(
+        "-ef",
+        "--evaluation_folder",
+        dest="evaluation_folder",
+        action="store",
+        required=True,
+    )
+    pretrain_args.add_argument(
+        "-smn",
+        "--sequence_model_name",
+        dest="sequence_model_name",
+        action="store",
+        required=True,
+    )
+    pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
     # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
-    setattr(pretrain_config, "epochs", 2)
-    setattr(pretrain_config, "batch_size", 32)
-    setattr(pretrain_config, "depth", 5)
-    setattr(pretrain_config, "include_visit", True)
-    setattr(pretrain_config, "max_seq_length", 512)
+    setattr(pipeline_config, "epochs", 2)
+    setattr(pipeline_config, "batch_size", 32)
+    setattr(pipeline_config, "depth", 5)
+    setattr(pipeline_config, "include_visit", True)
+    setattr(pipeline_config, "max_seq_length", 512)
+    # Force the evaluation config to be the same as the one from [cehr_bert
+    # README](https://github.com/cumc-dbmi/cehr-bert#5-fine-tune-cehr-bert-for-hf-readmission).
+    # I removed all required argument from the evaluation config.
+    setattr(pipeline_config, "action", SEQUENCE_MODEL)
+    # setattr(pipeline_config, "evaluation_depth", 5) # only used if using random bert
+    setattr(pipeline_config, "evaluation_batch_size", 128)
+    setattr(pipeline_config, "evaluation_epochs", 10)
+    setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
+    return pipeline_config
 
-    evaluation_config = create_evaluation_args().parse_args()
+
+if __name__ == "__main__":
     # setattr(evaluation_config, "sequence_model_data_path_test", )
-    setattr(evaluation_config, "action", SEQUENCE_MODEL)
-    setattr(evaluation_config, "max_seq_length", 512)
-    setattr(evaluation_config, "batch_size", 128)
-    setattr(evaluation_config, "epochs", 10)
-    setattr(evaluation_config, "model_evaluators", VANILLA_BERT_LSTM)
-    main(pretrain_config=pretrain_config, evaluation_config=evaluation_config)
+    # The required arguments are:
+    # "-i,--input_folder"
+    # "-o,--output_folder"
+    # "-sdt, --sequence_model_data_path_test"
+    # "-smn ,--sequence_model_name"
+    # "-ef, --evaluation_folder"
+    pipeline_config = create_parse_args_pipeline_evaluation()
+    main(pipeline_config=pipeline_config)

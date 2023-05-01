@@ -1,0 +1,7 @@
+Keras>=2.0.8
+numpy==1.18.5
+tqdm
+tensorflow==2.3.0
+pandas
+scikit-learn
+xgboost
