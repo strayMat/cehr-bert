@@ -114,15 +114,15 @@ def main(pipeline_config):
         # default name taken by the evaluator.
         folder_list = [
             f_name.name
-            for f_name in Path(pretrain_config.output_folder).iterdir()
+            for f_name in Path(pipeline_config.output_folder).iterdir()
             if f_name.name.find(".h5") != -1
         ]
         folder_list.sort()
         last_pretrain_model_path = str(
-            Path(pretrain_config.output_folder) / folder_list[-1]
+            Path(pipeline_config.output_folder) / folder_list[-1]
         )
         evaluation_pretrain_model_path = str(
-            Path(pretrain_config.output_folder) / p.bert_model_validation_path
+            Path(pipeline_config.output_folder) / p.bert_model_validation_path
         )
         shutil.rmtree(evaluation_pretrain_model_path)
         shutil.copyfile(
