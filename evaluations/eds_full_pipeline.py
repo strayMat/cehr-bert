@@ -44,17 +44,14 @@ ICD10_CHAPTERS = [
     "17",
     "8",
 ]
-ICD10_CHAPTERS = ["2"]
+# ICD10_CHAPTERS = ["2"]
 
-GRID_RANDOM_SEED = list(range(0, 2))
-GRID_PERCENTAGE = [
-    0.1,
-]  # 0.25, 0.5, 0.9, 1]
+GRID_RANDOM_SEED = list(range(0, 5))
+GRID_PERCENTAGE = [1]  # [0.1, 0.25, 0.5, 0.9, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
         "random_seed": GRID_RANDOM_SEED,
-        # "target_label": ["2"],
         "train_percentage": GRID_PERCENTAGE,
     }
 )

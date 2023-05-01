@@ -124,5 +124,5 @@ evaluation_dir=$local_cohort_dir$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline -sp;
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline;
 ```
