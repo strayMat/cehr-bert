@@ -112,3 +112,13 @@ mkdir -p $evaluation_dir
 
 ## 6. Evaluate the pipeline (pretrain + finetuning)
 
+```console
+local_cohort_dir=$HOME/"Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+pretrained_dir=$local_cohort_dir/"cehr_bert_pretrained_pipeline"
+input_dir=$local_cohort_dir/"cehr_bert_sequences"
+test_sequence_dir=$local_cohort_dir/"cehr_bert_finetuning_sequences_external_test"
+evaluation_dir=$local_cohort_dir/$myOutPut
+mkdir -p $evaluation_dir 
+
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $input_dir -o $pretrained_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline ;
+```

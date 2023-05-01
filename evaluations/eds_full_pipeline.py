@@ -67,9 +67,11 @@ def main(pipeline_config):
         pretrain_percentage_ = run_config["train_percentage"]
         # maybe doublon because it is set in both models
         set_seed(random_seed_)
+        pretrain_config = create_bert_model_config(pipeline_config)
+
         # create the effective train set from the sfull sequence data.
         # Do this with subsetting the existing sequences from the full train data.
-        full_sequences = pd.read_parquet(pipeline_config.parquet_data_path)
+        full_sequences = pd.read_parquet(pretrain_config.parquet_data_path)
         if pretrain_percentage_ < 1:
             train, _ = train_test_split(
                 np.arange(len(full_sequences)),
@@ -87,7 +89,6 @@ def main(pipeline_config):
         )
         shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
         effective_train_sequences.to_parquet(path2effective_train_sequences)
-        pretrain_config = create_bert_model_config(pipeline_config)
         VanillaBertTrainer(
             training_data_parquet_path=str(path2effective_train_sequences),
             model_path=pretrain_config.model_path,
