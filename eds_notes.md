@@ -112,12 +112,14 @@ mkdir -p $evaluation_dir
 
 ## 6. Evaluate the pipeline (pretrain + finetuning)
 
+NB: Don't forget to create the train and test data for the finetuning task (section 4.)
+
 ```console
 local_cohort_dir=$HOME/"Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 pretrained_dir=$local_cohort_dir"cehr_bert_pretrained_pipeline"
 pretrain_sequence=$local_cohort_dir"cehr_bert_sequences"
-test_sequence_dir=$local_cohort_dir/"cehr_bert_finetuning_sequences_external_test"
 train_sequence_dir=$local_cohort_dir"cehr_bert_finetuning_sequences_train"
+test_sequence_dir=$local_cohort_dir/"cehr_bert_finetuning_sequences_external_test"
 evaluation_dir=$local_cohort_dir$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir

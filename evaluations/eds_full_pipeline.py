@@ -126,7 +126,7 @@ def main(pipeline_config):
             Path(pipeline_config.output_folder) / p.bert_model_validation_path
         )
         if Path(evaluation_pretrain_model_path).exists():
-            shutil.rmtree(evaluation_pretrain_model_path)
+            Path(evaluation_pretrain_model_path).unlink()
         shutil.copyfile(
             last_pretrain_model_path, evaluation_pretrain_model_path
         )
@@ -146,7 +146,7 @@ def main(pipeline_config):
             pipeline_config.sequence_model_data_path_test
         )
         available_targets_counts = np.unique(
-            np.hstack(effective_train_sequences["label"].values)
+            np.hstack(effective_train_dataset["label"].values)
         )
 
         targets_to_run = [
