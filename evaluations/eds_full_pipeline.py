@@ -90,46 +90,48 @@ def main(pipeline_config):
         if path2effective_train_sequences.exists():
             shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
         effective_train_sequences.to_parquet(path2effective_train_sequences)
-        VanillaBertTrainer(
-            training_data_parquet_path=str(path2effective_train_sequences),
-            model_path=pretrain_config.model_path,
-            tokenizer_path=pretrain_config.tokenizer_path,
-            visit_tokenizer_path=pretrain_config.visit_tokenizer_path,
-            embedding_size=pretrain_config.concept_embedding_size,
-            context_window_size=pretrain_config.max_seq_length,
-            depth=pretrain_config.depth,
-            num_heads=pretrain_config.num_heads,
-            batch_size=pretrain_config.batch_size,
-            epochs=pretrain_config.epochs,
-            learning_rate=pretrain_config.learning_rate,
-            include_visit_prediction=pretrain_config.include_visit_prediction,
-            include_prolonged_length_stay=pretrain_config.include_prolonged_length_stay,
-            use_time_embedding=pretrain_config.use_time_embedding,
-            time_embeddings_size=pretrain_config.time_embeddings_size,
-            use_behrt=pretrain_config.use_behrt,
-            use_dask=pretrain_config.use_dask,
-            tf_board_log_path=pretrain_config.tf_board_log_path,
-            random_seed=random_seed_,
-        ).train_model()
-        # Copy the last epoch pretrained model to bert_model.h5 which is the
-        # default name taken by the evaluator.
-        folder_list = [
-            f_name.name
-            for f_name in Path(pipeline_config.output_folder).iterdir()
-            if f_name.name.find(".h5") != -1
-        ]
-        folder_list.sort()
-        last_pretrain_model_path = str(
-            Path(pipeline_config.output_folder) / folder_list[-1]
-        )
-        evaluation_pretrain_model_path = str(
-            Path(pipeline_config.output_folder) / p.bert_model_validation_path
-        )
-        if Path(evaluation_pretrain_model_path).exists():
-            Path(evaluation_pretrain_model_path).unlink()
-        shutil.copyfile(
-            last_pretrain_model_path, evaluation_pretrain_model_path
-        )
+        if not pipeline_config.skip_pretraining:
+            VanillaBertTrainer(
+                training_data_parquet_path=str(path2effective_train_sequences),
+                model_path=pretrain_config.model_path,
+                tokenizer_path=pretrain_config.tokenizer_path,
+                visit_tokenizer_path=pretrain_config.visit_tokenizer_path,
+                embedding_size=pretrain_config.concept_embedding_size,
+                context_window_size=pretrain_config.max_seq_length,
+                depth=pretrain_config.depth,
+                num_heads=pretrain_config.num_heads,
+                batch_size=pretrain_config.batch_size,
+                epochs=pretrain_config.epochs,
+                learning_rate=pretrain_config.learning_rate,
+                include_visit_prediction=pretrain_config.include_visit_prediction,
+                include_prolonged_length_stay=pretrain_config.include_prolonged_length_stay,
+                use_time_embedding=pretrain_config.use_time_embedding,
+                time_embeddings_size=pretrain_config.time_embeddings_size,
+                use_behrt=pretrain_config.use_behrt,
+                use_dask=pretrain_config.use_dask,
+                tf_board_log_path=pretrain_config.tf_board_log_path,
+                random_seed=random_seed_,
+            ).train_model()
+            # Copy the last epoch pretrained model to bert_model.h5 which is the
+            # default name taken by the evaluator.
+            folder_list = [
+                f_name.name
+                for f_name in Path(pipeline_config.output_folder).iterdir()
+                if f_name.name.find(".h5") != -1
+            ]
+            folder_list.sort()
+            last_pretrain_model_path = str(
+                Path(pipeline_config.output_folder) / folder_list[-1]
+            )
+            evaluation_pretrain_model_path = str(
+                Path(pipeline_config.output_folder)
+                / p.bert_model_validation_path
+            )
+            if Path(evaluation_pretrain_model_path).exists():
+                Path(evaluation_pretrain_model_path).unlink()
+            shutil.copyfile(
+                last_pretrain_model_path, evaluation_pretrain_model_path
+            )
         # Fine tune and evaluate:
         bert_tokenizer_path = os.path.join(
             pipeline_config.output_folder, p.tokenizer_path
@@ -206,6 +208,14 @@ def create_parse_args_pipeline_evaluation():
         dest="sequence_model_name",
         action="store",
         required=True,
+    )
+    # for debugging
+    pretrain_args.add_argument(
+        "-sp",
+        "--skip_pretraining",
+        dest="skip_pretraining",
+        action="store_true",
+        required=False,
     )
     pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
