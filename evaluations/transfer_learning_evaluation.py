@@ -1,7 +1,7 @@
 from evaluations.evaluation import create_evaluation_args, main
 
-TRAINING_PERCENTAGE = 'training_percentage'
-IS_TRANSFER_LEARNING = 'is_transfer_learning'
+TRAINING_PERCENTAGE = "training_percentage"
+IS_TRANSFER_LEARNING = "is_transfer_learning"
 PERCENTAGES = [0.05, 0.1, 0.2, 0.4, 0.8]
 
 if __name__ == "__main__":

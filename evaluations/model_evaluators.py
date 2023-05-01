@@ -105,12 +105,12 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             f"batch_size: {batch_size}\n"
             f"sequence_model_name: {sequence_model_name}\n"
         )
+        self._random_seed = random_seed
+        set_seed(self._random_seed)
         self._epochs = epochs
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
-        self._random_seed = random_seed
-        set_seed(self._random_seed)
         self._target_label = target_label
         if self._target_label is not None:
             train_prevalence = (

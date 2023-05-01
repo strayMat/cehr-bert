@@ -265,12 +265,13 @@ def create_evaluation_args():
         choices=SEQUENCE_MODEL_EVALUATORS,
         required=sequence_model_required,
     )
+    # eds-modified: rm required for pipeline evaluation
     group.add_argument(
         "-sd",
         "--sequence_model_data_path",
         dest="sequence_model_data_path",
         action="store",
-        required=sequence_model_required,
+        required=False,
     )
     # eds-modified: added a sequence model path
     group.add_argument(
@@ -341,12 +342,13 @@ def create_evaluation_args():
         action="store",
         required=lstm_model_required,
     )
+    # eds-modified: rm required for full pipeline evaluation
     group.add_argument(
         "-vb",
         "--vanilla_bert_model_folder",
         dest="vanilla_bert_model_folder",
         action="store",
-        required=vanilla_bert_lstm,
+        required=False,
     )
     group.add_argument(
         "-tb",

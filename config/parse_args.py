@@ -88,6 +88,8 @@ def create_parse_args():
 
 def create_parse_args_base_bert():
     parser = create_parse_args()
+    # eds-modified: remove required arguments (prefer pass them in python
+    # scripts for xps)
     parser.add_argument(
         "-d",
         "--depth",

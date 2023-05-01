@@ -1,3 +1,4 @@
+import argparse
 import logging
 import os
 from pathlib import Path
@@ -8,7 +9,11 @@ import spark_apps.parameters as p
 
 from sklearn.model_selection import ParameterGrid, train_test_split
 from config.parse_args import create_parse_args_base_bert
-from evaluations.evaluation import create_evaluation_args
+from evaluations.evaluation import (
+    SEQUENCE_MODEL,
+    VANILLA_BERT_LSTM,
+    create_evaluation_args,
+)
 from evaluations.model_evaluators import BertLstmModelEvaluator
 from trainers.train_bert_only import (
     VanillaBertTrainer,
@@ -39,6 +44,7 @@ ICD10_CHAPTERS = [
     "17",
     "8",
 ]
+ICD10_CHAPTERS = ["2"]
 
 GRID_RANDOM_SEED = list(range(0, 5))
 
@@ -51,16 +57,16 @@ PARAMETER_GRID = ParameterGrid(
 )
 
 
-def main(args):
+def main(pretrain_config, evaluation_config):
     for run_config in PARAMETER_GRID:
-        config = create_bert_model_config(args)
-
+        # set paths
         random_seed_ = run_config["random_seed"]
         pretrain_percentage_ = run_config["train_percentage"]
+        # maybe doublon because it is set in both models
         set_seed(random_seed_)
         # create the sequence data from the full data.
         # Do this with subsetting the existing sequences from the full train data.
-        full_sequences = pd.read_parquet(config.parquet_data_path)
+        full_sequences = pd.read_parquet(pretrain_config.parquet_data_path)
         if pretrain_percentage_ < 1:
             train, _ = train_test_split(
                 np.arange(len(full_sequences)),
@@ -74,42 +80,43 @@ def main(args):
             )
 
         path2train_sequences = Path(
-            config.parquet_data_path + f"_effective_train"
+            pretrain_config.parquet_data_path + f"_effective_train"
         )
         shutil.rmtree(path2train_sequences, ignore_errors=True)
         train_sequences.to_parquet(path2train_sequences)
         VanillaBertTrainer(
-            training_data_parquet_path=config.parquet_data_path,
-            model_path=config.model_path,
-            tokenizer_path=config.tokenizer_path,
-            visit_tokenizer_path=config.visit_tokenizer_path,
-            embedding_size=config.concept_embedding_size,
-            context_window_size=config.max_seq_length,
-            depth=config.depth,
-            num_heads=config.num_heads,
-            batch_size=config.batch_size,
-            epochs=config.epochs,
-            learning_rate=config.learning_rate,
-            include_visit_prediction=config.include_visit_prediction,
-            include_prolonged_length_stay=config.include_prolonged_length_stay,
-            use_time_embedding=config.use_time_embedding,
-            time_embeddings_size=config.time_embeddings_size,
-            use_behrt=config.use_behrt,
-            use_dask=config.use_dask,
-            tf_board_log_path=config.tf_board_log_path,
+            training_data_parquet_path=pretrain_config.parquet_data_path,
+            model_path=pretrain_config.model_path,
+            tokenizer_path=pretrain_config.tokenizer_path,
+            visit_tokenizer_path=pretrain_config.visit_tokenizer_path,
+            embedding_size=pretrain_config.concept_embedding_size,
+            context_window_size=pretrain_config.max_seq_length,
+            depth=pretrain_config.depth,
+            num_heads=pretrain_config.num_heads,
+            batch_size=pretrain_config.batch_size,
+            epochs=pretrain_config.epochs,
+            learning_rate=pretrain_config.learning_rate,
+            include_visit_prediction=pretrain_config.include_visit_prediction,
+            include_prolonged_length_stay=pretrain_config.include_prolonged_length_stay,
+            use_time_embedding=pretrain_config.use_time_embedding,
+            time_embeddings_size=pretrain_config.time_embeddings_size,
+            use_behrt=pretrain_config.use_behrt,
+            use_dask=pretrain_config.use_dask,
+            tf_board_log_path=pretrain_config.tf_board_log_path,
+            random_seed=random_seed_,
         ).train_model()
         # Copy the last epoch pretrained model to bert_model.h5 which is the
         # default name taken by the evaluator.
         folder_list = [
             f_name.name
-            for f_name in Path(config.model_path).iterdir()
+            for f_name in Path(pretrain_config.model_path).iterdir()
             if f_name.name.find(".h5") != -1
         ]
         folder_list.sort()
         last_model_name = folder_list[-1]
         shutil.copyfile(
-            str(Path(config.model_path) / last_model_name),
-            str(Path(config.model_path) / "bert_model.h5"),
+            str(Path(pretrain_config.model_path) / last_model_name),
+            str(Path(pretrain_config.model_path) / "bert_model.h5"),
         )
         # Fine tune and evaluate:
         bert_tokenizer_path = os.path.join(bert_model_path, p.tokenizer_path)
@@ -151,10 +158,23 @@ def main(args):
             ).train_transfer(test_dataset=test_dataset)
 
 
-def create_parse_args_pretrain_finetune():
-    # TODO:
-    return
-
-
 if __name__ == "__main__":
-    main(create_parse_args_pretrain_finetune().parse_args())
+    pretrain_config = create_bert_model_config(
+        create_parse_args_base_bert().parse_args()
+    )
+    # Force the pretrain config to be the same as the one from [cehr_bert
+    # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
+    setattr(pretrain_config, "epochs", 2)
+    setattr(pretrain_config, "batch_size", 32)
+    setattr(pretrain_config, "depth", 5)
+    setattr(pretrain_config, "include_visit", True)
+    setattr(pretrain_config, "max_seq_length", 512)
+
+    evaluation_config = create_evaluation_args().parse_args()
+    # setattr(evaluation_config, "sequence_model_data_path_test", )
+    setattr(evaluation_config, "action", SEQUENCE_MODEL)
+    setattr(evaluation_config, "max_seq_length", 512)
+    setattr(evaluation_config, "batch_size", 128)
+    setattr(evaluation_config, "epochs", 10)
+    setattr(evaluation_config, "model_evaluators", VANILLA_BERT_LSTM)
+    main(pretrain_config=pretrain_config, evaluation_config=evaluation_config)
