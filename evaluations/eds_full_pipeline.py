@@ -165,7 +165,7 @@ def main(pipeline_config):
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
                 training_percentage=pretrain_percentage_,
-                max_seq_length=pipeline_config.evaluation_max_seq_length,
+                max_seq_length=pipeline_config.max_seq_length,
                 batch_size=pipeline_config.evaluation_batch_size,
                 epochs=pipeline_config.evaluation_epochs,
                 tokenizer_path=bert_tokenizer_path,
@@ -219,7 +219,6 @@ def create_parse_args_pipeline_evaluation():
     # README](https://github.com/cumc-dbmi/cehr-bert#5-fine-tune-cehr-bert-for-hf-readmission).
     # I removed all required argument from the evaluation config.
     setattr(pipeline_config, "action", SEQUENCE_MODEL)
-    # setattr(pipeline_config, "evaluation_depth", 5) # only used if using random bert
     setattr(pipeline_config, "evaluation_batch_size", 128)
     setattr(pipeline_config, "evaluation_epochs", 10)
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
