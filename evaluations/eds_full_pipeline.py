@@ -143,7 +143,8 @@ def main(pipeline_config):
             train_dataset["person_id"].isin(
                 effective_train_sequences["person_id"].values
             )
-        ]
+        ].reset_index()
+        breakpoint()
         test_dataset = pd.read_parquet(
             pipeline_config.sequence_model_data_path_test
         )
