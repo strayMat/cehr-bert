@@ -87,7 +87,8 @@ def main(pipeline_config):
         path2effective_train_sequences = Path(
             pretrain_config.parquet_data_path + f"_effective_train"
         )
-        shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
+        if path2effective_train_sequences.exists():
+            shutil.rmtree(path2effective_train_sequences, ignore_errors=True)
         effective_train_sequences.to_parquet(path2effective_train_sequences)
         VanillaBertTrainer(
             training_data_parquet_path=str(path2effective_train_sequences),
@@ -124,7 +125,8 @@ def main(pipeline_config):
         evaluation_pretrain_model_path = str(
             Path(pipeline_config.output_folder) / p.bert_model_validation_path
         )
-        shutil.rmtree(evaluation_pretrain_model_path)
+        if Path(evaluation_pretrain_model_path).exists():
+            shutil.rmtree(evaluation_pretrain_model_path)
         shutil.copyfile(
             last_pretrain_model_path, evaluation_pretrain_model_path
         )
@@ -194,8 +196,8 @@ def create_parse_args_pipeline_evaluation():
     pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
     # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
-    setattr(pipeline_config, "epochs", 2)
-    setattr(pipeline_config, "batch_size", 32)
+    setattr(pipeline_config, "epochs", 1)
+    setattr(pipeline_config, "batch_size", 128)
     setattr(pipeline_config, "depth", 5)
     setattr(pipeline_config, "include_visit", True)
     setattr(pipeline_config, "max_seq_length", 512)
