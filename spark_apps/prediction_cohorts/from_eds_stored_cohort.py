@@ -18,7 +18,10 @@ COLNAME_FOLLOWUP_START = "followup_start"
 
 
 def create_cohort_from_eds_eventCohort_dir(
-    input_folder: str, output_folder: str, train_test_split_folder: str = None
+    input_folder: str,
+    output_folder: str,
+    train_test_split_folder: str = None,
+    split_group: str = None,
 ):
     """From a [EventCohort](), create the sequence of events necessary for cerh-bert
     fine tuning prediction tasks.
@@ -32,6 +35,9 @@ def create_cohort_from_eds_eventCohort_dir(
         output_folder (str): _description_
 
         train_split (str): path to a train split dataset.
+
+        split_group (str, optional): if a split_group for specifing splitting
+        (for example in cross validation), has been defined in the train_test_split_dataframe
     """
     input_folder_path = Path(input_folder)
     cohort_name = input_folder_path.name
@@ -45,22 +51,25 @@ def create_cohort_from_eds_eventCohort_dir(
 
     if train_test_split_folder is not None:
         train_split_dataset = pd.read_parquet(train_test_split_folder)
+        train_test_split_cols = ["person_id"]
+        if split_group is not None:
+            train_test_split_cols += [split_group]
         for split_name in train_split_dataset["dataset"].unique():
             split_ids = train_split_dataset.loc[
                 train_split_dataset["dataset"] == split_name
-            ][["person_id"]]
+            ][train_test_split_cols]
             split_person = person.join(
                 spark.createDataFrame(split_ids),
                 on="person_id",
                 how="inner",
             )
             split_event = event.join(
-                spark.createDataFrame(split_ids),
+                spark.createDataFrame(split_ids[["person_id"]]),
                 on="person_id",
                 how="inner",
             )
             split_cohort_sequence_target = create_cohort_from_eds_eventCohort(
-                person=split_person, event=split_event
+                person=split_person, event=split_event, split_group=split_group
             )
             split_cohort_sequence_target.write.mode("overwrite").parquet(
                 str(output_folder) + f"_{split_name}"
@@ -76,8 +85,7 @@ def create_cohort_from_eds_eventCohort_dir(
 
 
 def create_cohort_from_eds_eventCohort(
-    person: DataFrame,
-    event: DataFrame,
+    person: DataFrame, event: DataFrame, split_group: str = None
 ) -> DataFrame:
     """
     From person and event, return the sequences for cehr-bert inputs.
@@ -96,6 +104,17 @@ def create_cohort_from_eds_eventCohort(
         "visit_occurrence_id",
         "domain",
     )
+    statics_cols = [
+        "person_id",
+        "cohort_member_id",
+        "gender_concept_id",
+        "race_concept_id",
+        "birth_datetime",
+        F.col(COLNAME_OUTCOME).alias("label"),
+        "index_date",
+    ]
+    if split_group is not None:
+        statics_cols += [F.col(split_group).alias("split_group")]
     target_w_statics = (
         person.withColumn(
             "gender_concept_id",
@@ -108,15 +127,7 @@ def create_cohort_from_eds_eventCohort(
         .withColumn("cohort_member_id", F.col("person_id"))
         .withColumn("race_concept_id", F.lit(0))
         .withColumn("index_date", F.col(COLNAME_FOLLOWUP_START))
-        .select(
-            "person_id",
-            "cohort_member_id",
-            "gender_concept_id",
-            "race_concept_id",
-            "birth_datetime",
-            F.col(COLNAME_OUTCOME).alias("label"),
-            "index_date",
-        )
+        .select(statics_cols)
     )
     patient_ehr_records = target_w_statics.join(
         event_w_subset_columns, on="person_id", how="inner"
@@ -173,7 +184,15 @@ if __name__ == "__main__":
         "--train_test_split_folder",
         dest="train_test_split_folder",
         action="store",
-        help="The path to the train test split dataframe formatted as ['person_id', 'dataset']",
+        help="The path to the train test split data frame formatted as ['person_id', 'dataset']",
+        default=None,
+    )
+    parser.add_argument(
+        "-sg",
+        "--split_group",
+        dest="split_group",
+        action="store",
+        help="The column name for a split_group present in the train test split to be stored in the final sequences.",
         default=None,
     )
     args = parser.parse_args()

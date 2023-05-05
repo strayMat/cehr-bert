@@ -66,7 +66,7 @@ def main(pipeline_config):
         set_seed(random_seed_)
         pretrain_config = create_bert_model_config(pipeline_config)
 
-        # create the effective train set from the sfull sequence data.
+        # create the effective train set from the full sequence data.
         # Do this with subsetting the existing sequences from the full train data.
         full_sequences = pd.read_parquet(pretrain_config.parquet_data_path)
         if pretrain_percentage_ < 1:
@@ -158,7 +158,7 @@ def main(pipeline_config):
                 bert_model_path=evaluation_pretrain_model_path,
                 dataset=effective_train_dataset,
                 evaluation_folder=pipeline_config.evaluation_folder,
-                num_of_folds=1,
+                num_of_folds=1,  # no incidence for our transfer evaluation choice.
                 is_transfer_learning=False,
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
@@ -172,6 +172,7 @@ def main(pipeline_config):
                 + f"__target_{target_}",
                 target_label=target_,
                 random_seed=random_seed_,
+                split_group=pipeline_config.get("split_group", None),
             ).train_transfer(test_dataset=test_dataset)
 
 
@@ -216,7 +217,7 @@ def create_parse_args_pipeline_evaluation():
     pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
     # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
-    setattr(pipeline_config, "epochs", 1)
+    setattr(pipeline_config, "epochs", 2)
     setattr(pipeline_config, "batch_size", 32)
     setattr(pipeline_config, "depth", 5)
     setattr(pipeline_config, "include_visit", True)
@@ -225,9 +226,11 @@ def create_parse_args_pipeline_evaluation():
     # README](https://github.com/cumc-dbmi/cehr-bert#5-fine-tune-cehr-bert-for-hf-readmission).
     # I removed all required argument from the evaluation config.
     setattr(pipeline_config, "action", SEQUENCE_MODEL)
-    setattr(pipeline_config, "evaluation_batch_size", 128)
+    setattr(pipeline_config, "evaluation_batch_size", 32)
     setattr(pipeline_config, "evaluation_epochs", 10)
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
+    # add split group for train, val as most visited hospital
+    setattr(pipeline_config, "split_group", "split_group")
     return pipeline_config
 
 
