@@ -52,9 +52,9 @@ GPU: The conda environment seems to miss conda `Could not load dynamic library '
 ```console
 input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 output_dir=$input_dir"cehr_bert_finetuning_sequences"
-train_test_split_folder=$input_dir"hospital_split.parquet"
+train_test_split_folder=$input_dir"hospital_split.parquet" 
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "most_visited_hospital"
 ```
 
 ### Matthieu's note
@@ -115,14 +115,26 @@ mkdir -p $evaluation_dir
 NB: Don't forget to create the train and test data for the finetuning task (section 4.)
 
 ```console
-local_cohort_dir=$HOME/"Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
-pretrained_dir=$local_cohort_dir"cehr_bert_pretrained_pipeline"
-pretrain_sequence=$local_cohort_dir"cehr_bert_sequences"
-train_sequence_dir=$local_cohort_dir"cehr_bert_finetuning_sequences_train"
-test_sequence_dir=$local_cohort_dir/"cehr_bert_finetuning_sequences_external_test"
-evaluation_dir=$local_cohort_dir$myOutPut
+local_cohort_dir="Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+
+## copie des data en local vers le ssd
+mySourcePath=$HOME/$local_cohort_dir
+myDestPath=$mySourcePath
+
+# #only used for slurm to avoid copying all input data
+#myDestPath=$scratch/$USER/$local_cohort_dir
+#mkdir -p $myDestPath
+#(cd ${mySourcePath}; tar cf - .) | (cd ${myDestPath}; tar xpf -)
+pretrained_dir=$mySourcePath"cehr_bert_pretrained_pipeline"
+pretrain_sequence=$myDestPath"cehr_bert_sequences"
+train_sequence_dir=$myDestPath"cehr_bert_finetuning_sequences_train"
+test_sequence_dir=$myDestPath"cehr_bert_finetuning_sequences_external_test"
+
+# Create the evaluation folder
+myOutPut="evaluation_train_val_split"
+evaluation_dir=$mySourcePath$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline;
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_hospital_split
 ```
