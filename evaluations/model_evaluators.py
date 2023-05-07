@@ -1,6 +1,6 @@
 import copy
 from abc import abstractmethod, ABC
-from sklearn.model_selection import KFold
+from sklearn.model_selection import GroupShuffleSplit, KFold
 from sklearn.model_selection import train_test_split
 
 from scipy.sparse import csr_matrix, hstack
@@ -97,6 +97,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         sequence_model_name=None,
         target_label: str = None,
         random_seed: int = 42,
+        split_group: str = None,
         *args,
         **kwargs,
     ):
@@ -111,6 +112,8 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
+        self._split_group = split_group
+        # depracated ?
         self._target_label = target_label
         if self._target_label is not None:
             train_prevalence = (
@@ -177,9 +180,17 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         # if self._training_percentage < 1:
         #     size = int(len(labels) * self._training_percentage)
         #     train_val_ix = np.random.choice(train_val_ix, size, replace=False)
-        train, val = train_test_split(
-            train_val_ix, random_state=self._random_seed
-        )
+        if self._split_group is not None:
+            gss = GroupShuffleSplit(
+                n_splits=1, train_size=0.75, random_state=self._random_seed
+            )
+            gss.get_n_splits(train_val_ix)
+            groups = inputs.pop(self._split_group)
+            train, val = next(iter(gss.split(train_val_ix, groups=groups)))
+        else:
+            train, val = train_test_split(
+                train_val_ix, random_state=self._random_seed, train_size=0.75
+            )
         training_input = {k: v[train] for k, v in inputs.items()}
         val_input = {k: v[val] for k, v in inputs.items()}
 
@@ -453,6 +464,8 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             "ages": padded_ages,
             "visit_concept_orders": padded_visit_concept_orders,
         }
+        if "split_group" in dataset_.columns:
+            inputs["split_group"] = dataset_["split_group"]
         return inputs, labels
 
 
