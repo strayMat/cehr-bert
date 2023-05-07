@@ -44,10 +44,10 @@ ICD10_CHAPTERS = [
     "17",
     "8",
 ]
-# ICD10_CHAPTERS = ["2"]
+#ICD10_CHAPTERS = ["2"]
 
 GRID_RANDOM_SEED = list(range(0, 5))
-GRID_PERCENTAGE = [1]  # [0.1, 0.25, 0.5, 0.9, 1]
+GRID_PERCENTAGE = [0.1]  # [0.02, 0.1, 0.5, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
@@ -216,7 +216,7 @@ def create_parse_args_pipeline_evaluation():
     pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
     # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
-    setattr(pipeline_config, "epochs", 1)
+    setattr(pipeline_config, "epochs", 2)
     setattr(pipeline_config, "batch_size", 32)
     setattr(pipeline_config, "depth", 5)
     setattr(pipeline_config, "include_visit", True)
@@ -225,7 +225,7 @@ def create_parse_args_pipeline_evaluation():
     # README](https://github.com/cumc-dbmi/cehr-bert#5-fine-tune-cehr-bert-for-hf-readmission).
     # I removed all required argument from the evaluation config.
     setattr(pipeline_config, "action", SEQUENCE_MODEL)
-    setattr(pipeline_config, "evaluation_batch_size", 128)
+    setattr(pipeline_config, "evaluation_batch_size", 32)
     setattr(pipeline_config, "evaluation_epochs", 10)
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
     return pipeline_config
