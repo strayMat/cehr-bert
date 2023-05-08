@@ -119,9 +119,9 @@ local_cohort_dir="Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age
 
 ## copie des data en local vers le ssd
 mySourcePath=$HOME/$local_cohort_dir
-myDestPath=$mySourcePath
 
-# #only used for slurm to avoid copying all input data
+# #only used for slurm to avoid copying all input data, comment the following line and uncomment all others:
+myDestPath=$mySourcePath
 #myDestPath=$scratch/$USER/$local_cohort_dir
 #mkdir -p $myDestPath
 #(cd ${mySourcePath}; tar cf - .) | (cd ${myDestPath}; tar xpf -)
