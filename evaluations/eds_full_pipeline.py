@@ -154,7 +154,6 @@ def main(pipeline_config):
             logging.getLogger().info(
                 f"Finetuning for 🎯={target_}, 🌱={random_seed_}"
             )
-            # split group
             bert_model = BertLstmModelEvaluator(
                 bert_model_path=evaluation_pretrain_model_path,
                 dataset=effective_train_dataset,
