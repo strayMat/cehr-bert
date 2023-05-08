@@ -200,4 +200,5 @@ if __name__ == "__main__":
         input_folder=args.input_folder,
         output_folder=args.output_folder,
         train_test_split_folder=args.train_test_split_folder,
+        split_group=args.split_group,
     )
