@@ -1,7 +1,7 @@
 ## Adapation of CEHR-BERT to the Paris Greater Hospital data and computing environment
 
 This repo is a fork from the original [cehr-bert](https://github.com/cumc-dbmi/cehr-bert) EHR foundational model.
-I used it to evaluate this large transformer-based model on the data from Paris Greater Hospital: . The experiments are described in a separated repository: [medical_embeddings_transfer](https://soda.gitlabpages.inria.fr/medical_embeddings_transfer/experiences.html) TODO: document the tasks.  
+I used it to evaluate this large transformer-based model on the data from Paris Greater Hospital: . The experiments are described in a separated repository: [medical_embeddings_transfer](https://soda.gitlabpages.inria.fr/medical_embeddings_transfer/experiences.html) TODO: better document the tasks. 
 
 The transfer of the models to this different environment required minor changes to the original source code. 
 

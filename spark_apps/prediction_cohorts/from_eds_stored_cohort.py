@@ -20,7 +20,7 @@ COLNAME_FOLLOWUP_START = "followup_start"
 def create_cohort_from_eds_eventCohort_dir(
     input_folder: str,
     output_folder: str,
-    train_test_split_folder: str = None,
+    train_test_split_file_path: str = None,
     split_group: str = None,
 ):
     """From a [EventCohort](), create the sequence of events necessary for cerh-bert
@@ -49,8 +49,8 @@ def create_cohort_from_eds_eventCohort_dir(
     event = spark.read.parquet(str(input_folder_path / "event.parquet"))
     person = spark.read.parquet(str(input_folder_path / "person.parquet"))
 
-    if train_test_split_folder is not None:
-        train_split_dataset = pd.read_parquet(train_test_split_folder)
+    if train_test_split_file_path is not None:
+        train_split_dataset = pd.read_parquet(train_test_split_file_path)
         train_test_split_cols = ["person_id"]
         if split_group is not None:
             train_test_split_cols += [split_group]
@@ -139,7 +139,7 @@ def create_cohort_from_eds_eventCohort(
         ),
     )
     # TODO: right now, I dont't extract visit type, but it should not be
-    # important, since it seems to be used only for the pretraining.
+    # important, since it seems to be used only for the pre-training.
     # If necessary, a join with the visit_occurrence table is necessary.
     cohort_sequence = create_sequence_data_with_att(
         patient_ehr_records_w_age,
@@ -181,8 +181,8 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-s",
-        "--train_test_split_folder",
-        dest="train_test_split_folder",
+        "--train_test_split_file_path",
+        dest="train_test_split_file_path",
         action="store",
         help="The path to the train test split data frame formatted as ['person_id', 'dataset']",
         default=None,
@@ -199,6 +199,6 @@ if __name__ == "__main__":
     create_cohort_from_eds_eventCohort_dir(
         input_folder=args.input_folder,
         output_folder=args.output_folder,
-        train_test_split_folder=args.train_test_split_folder,
+        train_test_split_file_path=args.train_test_split_file_path,
         split_group=args.split_group,
     )

@@ -1,15 +1,37 @@
 # Following the README on EDS data
 
-The tag `eds-modified:` allows to see where a modified the cehr_bert code for
+Nb: The tag `eds-modified:` allows to see where a modified the cehr_bert code for
 our use case on the APHP eds.
 
-## 1. Download OMOP tables as parquet files
+## Pretrain 
+
+
+### 1. Convert APHP OMOP format to CEHR-BERT fully compatible OMOP tables as parquet files
+
+The format between APHP and CEHR-BERT OMOP are not exactly the same. 
+
+Goal: Provide OMOP tables as parquet files that can be ingested by CEHR-BERT
+preprocessing to be transformed into sequences appropriate for the transformer
+model. 
 
 I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence). It uses polars and some codes I am using for the other experiments.
 
-Goal: Provide omop tables as parquet files that can be ingested by CEHR-BERT preprocessing to be transformed into sequences appropriate for the transformer model. 
 
-## 2. Generate training data for CEHR-BERT
+### 2. Generate training data for CEHR-BERT: create sequences from OMOP tables
+
+
+**Goal:** Generate sequences appropriate for the transformer model from the OMOP
+tables generated in step 1.
+
+**Command on EDS:**  
+```console
+cohort_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+input_dir=$cohort_dir"cehr_bert_train"
+output_dir=$cohort_dir"cehr_bert_sequences"
+PYTHONPATH=./: spark-submit spark_apps/generate_training_data.py -i $input_dir -o $output_dir -tc condition_occurrence procedure_occurrence drug_exposure -d 2017-06-01 --is_new_patient_representation -iv 
+```
+
+**Remarks:**
 
 Checking what does `/spark_apps/generate_training_data.py::main`
 - `preprocess_domain_table`: I deactivated the rollup, so it does nothing but force the colnames to lower
@@ -19,39 +41,42 @@ Checking what does `/spark_apps/generate_training_data.py::main`
     - I had to make sure the datetime are well converted from string to datetime. 
     - I had to change the columns of interest for getting the good codes (`utils/spark_utils.py::DOMAIN_KEY_FIELDS`).
 
-The command on eds should be 
-```console
-cohort_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
-input_dir=$cohort_dir"cehr_bert_train"
-output_dir=$cohort_dir"cehr_bert_sequences"
-PYTHONPATH=./: spark-submit spark_apps/generate_training_data.py -i $input_dir -o $output_dir -tc condition_occurrence procedure_occurrence drug_exposure -d 2017-06-01 --is_new_patient_representation -iv 
-```
 
-Goal: Generate sequences appropriate for the transformer model from the OMOP tables.
 
 ## 3. Pre-train CEHR-BERT
 
-NB: Don't forget to create the `output_dir` folder. 
+Goal: Pretrain the transformer model on the sequences generated in step 2 with
+Masked Language Model and Visit type tasks.
+
+**Command on EDS:**
 
 ```console
 cohort_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 input_dir=$cohort_dir"cehr_bert_sequences"
 output_dir=$cohort_dir"cehr_bert_pretrained_model"
+mkdir -p $output_dir
 
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python trainers/train_bert_only.py -i $input_dir -o $output_dir -iv -m 512 -e 2 -b 32 -d 5 --use_time_embedding
 ```
 
-CPU: should work as is.
-GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I add to install tensorflow-gpu, but once installed, it worked like a charm (6min).
+**Remarks:**  
 
-## 4. Generate next visit icd10 chapter prediction task
+- CPU: should work as is.
+- GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I add to install tensorflow-gpu, but once installed, it worked like a charm.
 
-### Use the medem code to create an event cohort
+## Fine-tune on a downstream task
+
+### 4. Generate cehr-bert compatible data for the prediction task
+
+**Prerequisite:** Having a cohort with a defined task.
 
 - you should obtain a folder with two dataframes:
- - a person : static informations (sex, ) and task specific information (followup_start, y).
+ - a person : static informations (sex, ) and task specific information (at least columns: `followup_start` and `y`).
  - an event dataframe: events only present in the observation period for the predictive task
-- use the dedicated functions for the eds: `spark_apps.prediction_cohorts.from_eds_stored_cohort.py::create_cohort_from_eds_eventCohort`. The command should looks like: 
+
+**Command on EDS:**
+
+Then use the dedicated functions for the eds: `spark_apps.prediction_cohorts.from_eds_stored_cohort.py::create_cohort_from_eds_eventCohort`. The command should looks like: 
 
 ```console
 input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
@@ -61,7 +86,7 @@ train_test_split_folder=$input_dir"hospital_split.parquet"
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "most_visited_hospital"
 ```
 
-### Matthieu's note
+**Remarks:**  
 
 The code of cert-behrt for cohort creation is difficult to read: too many
 arguments, mix between sql and spark.
@@ -72,7 +97,7 @@ Q:
 
 - In the hf_readmission samples that they give, there is the following columns in addition to the patient_sequence used for pretraining: `['gender_concept_id', 'race_concept_id', 'index_date', 'visit_occurrence_id', 'label', 'age']`. These are all statics that I can populate, then join to the sequences using the `utils.spark_utils.py::create_sequence_data_with_att`. 
 
-## 5. Fine-tune CEHR-BERT for a given task
+### 5. Fine-tune CEHR-BERT for a given task
 
 The default mode is to create the folds randomly, I am not sure, it is possible to fine-tune on a population, and transfer on another. 
 TODO: inspect the `is_transfer_learning` parameter.
