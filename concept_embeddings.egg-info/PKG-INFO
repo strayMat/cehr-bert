@@ -1,0 +1,15 @@
+Metadata-Version: 1.2
+Name: concept-embeddings
+Version: 0.1.dev286+g16e6c00
+Summary: UNKNOWN
+Home-page: UNKNOWN
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: development
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.6.0
