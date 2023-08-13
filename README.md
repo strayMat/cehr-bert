@@ -1,3 +1,14 @@
+## Adapation of CEHR-BERT to the Paris Greater Hospital data and computing environment
+
+This repo is a fork from the original [cehr-bert](https://github.com/cumc-dbmi/cehr-bert) EHR foundational model.
+I used it to evaluate this large transformer-based model on the data from Paris Greater Hospital: . The experiments are described in a separated repository: [medical_embeddings_transfer](https://soda.gitlabpages.inria.fr/medical_embeddings_transfer/experiences.html) TODO: document the tasks.  
+
+The transfer of the models to this different environment required minor changes to the original source code. 
+
+📄 These changes are documented extensively in [eds_notes.md](https://github.com/strayMat/cehr-bert/blob/master/eds_notes.md). 
+
+👨‍💻 These changes have been merged in the main branch of this repo in [this Pull Request](https://github.com/strayMat/cehr-bert/pull/1).
+
 ## CEHR-BERT
 CEHR-BERT is a large language model developed for the structured EHR data, the work has been published at https://proceedings.mlr.press/v158/pang21a.html. CEHR-BERT currently only supports the structured EHR data in the OMOP format, which is a common data model used to support observational studies and managed  by the Observational Health Data Science and Informatics (OHDSI) open-science community. 
 There are three major components in CEHR-BERT, data generation, model pre-training, and model evaluation with fine-tuning, those components work in conjunction to provide an end-to-end model evaluation framework. The CEHR-BERT framework is designed to be extensible, users could write their own [pretraining models](trainers/README.md), [evaluation procedures](evaluations/README.md), and [downstream prediction tasks](spark_apps/README.md) by extending the abstract classes, see click on the links for more details. For a quick start, navigate to the [Get Started](#getting-started) section. 
