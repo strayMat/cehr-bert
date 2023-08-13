@@ -5,7 +5,7 @@ our use case on the APHP eds.
 
 ## 1. Download OMOP tables as parquet files
 
-I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence)
+I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence). It uses polars and some codes I am using for the other experiments.
 
 Goal: Provide omop tables as parquet files that can be ingested by CEHR-BERT preprocessing to be transformed into sequences appropriate for the transformer model. 
 
