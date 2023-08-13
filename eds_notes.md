@@ -7,6 +7,8 @@ our use case on the APHP eds.
 
 I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence)
 
+Goal: Provide omop tables as parquet files that can be ingested by CEHR-BERT preprocessing to be transformed into sequences appropriate for the transformer model. 
+
 ## 2. Generate training data for CEHR-BERT
 
 Checking what does `/spark_apps/generate_training_data.py::main`
@@ -25,6 +27,8 @@ output_dir=$cohort_dir"cehr_bert_sequences"
 PYTHONPATH=./: spark-submit spark_apps/generate_training_data.py -i $input_dir -o $output_dir -tc condition_occurrence procedure_occurrence drug_exposure -d 2017-06-01 --is_new_patient_representation -iv 
 ```
 
+Goal: Generate sequences appropriate for the transformer model from the OMOP tables.
+
 ## 3. Pre-train CEHR-BERT
 
 NB: Don't forget to create the `output_dir` folder. 
@@ -32,7 +36,7 @@ NB: Don't forget to create the `output_dir` folder.
 ```console
 cohort_dir="/export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 input_dir=$cohort_dir"cehr_bert_sequences"
-output_dir=$cohort_dir"cehr_bert_pretrained"
+output_dir=$cohort_dir"cehr_bert_pretrained_model"
 
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python trainers/train_bert_only.py -i $input_dir -o $output_dir -iv -m 512 -e 2 -b 32 -d 5 --use_time_embedding
 ```
@@ -138,3 +142,6 @@ mkdir -p $pretrained_dir
 
 /export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_hospital_split
 ```
+The training percentage is set to 1 and can be changed directly in the eds_full_pipeline.py script which run 5 random seed run by default.
+
+On APHP JupyterHub, I put a dedicated sbatch file with these instructions in the cehr-bert folder.
