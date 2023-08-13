@@ -1,4 +1,6 @@
-from evaluations.eds_full_pipeline import create_parse_args_pipeline_evaluation
+from evaluations.eds_prognosis_pipeline import (
+    create_parse_args_pipeline_evaluation,
+)
 
 
 def main(pipeline_config):

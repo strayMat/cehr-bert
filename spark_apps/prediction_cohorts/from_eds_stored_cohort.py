@@ -192,7 +192,7 @@ if __name__ == "__main__":
         "--split_group",
         dest="split_group",
         action="store",
-        help="The column name for a split_group present in the train test split to be stored in the final sequences.",
+        help="The column name for a split_group present in the train test split to be stored in the final sequences. This can be used for cross-validation.",
         default=None,
     )
     args = parser.parse_args()

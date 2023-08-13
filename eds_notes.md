@@ -42,8 +42,11 @@ Checking what does `/spark_apps/generate_training_data.py::main`
     - I had to change the columns of interest for getting the good codes (`utils/spark_utils.py::DOMAIN_KEY_FIELDS`).
 
 
-
 ## 3. Pre-train CEHR-BERT
+
+Here, you have two choices: either pretraining only once the transformer model (described here) and then transfer it on a downstream task (described in section 4-5). 
+Or running the full pretrain-finetune pipeline (described in section 6).
+
 
 Goal: Pretrain the transformer model on the sequences generated in step 2 with
 Masked Language Model and Visit type tasks.
@@ -81,14 +84,14 @@ Then use the dedicated functions for the eds: `spark_apps.prediction_cohorts.fro
 ```console
 input_dir="file:///export/home/cse210038/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 output_dir=$input_dir"cehr_bert_finetuning_sequences"
-train_test_split_folder=$input_dir"hospital_split.parquet" 
+train_test_split_folder=$input_dir"/dataset_split.parquet" 
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "most_visited_hospital"
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "hospital_split"
 ```
 
 **Remarks:**  
 
-The code of cert-behrt for cohort creation is difficult to read: too many
+The code of cert-bert for cohort creation is difficult to read: too many
 arguments, mix between sql and spark.
 Q: 
 - What is the `cohort_member_id` in `spark_apps/cohorts/spark_app_base.py::NestedCohortBuilder.cohort_member_id`, is it important ? It is a rank over person_id, index_date and visit_occurrence_id. In my case, it can be the person_id, since I am only considering one visit per person. 
@@ -96,6 +99,7 @@ Q:
   serves as a pretraining task in addition to the MLM task.
 
 - In the hf_readmission samples that they give, there is the following columns in addition to the patient_sequence used for pretraining: `['gender_concept_id', 'race_concept_id', 'index_date', 'visit_occurrence_id', 'label', 'age']`. These are all statics that I can populate, then join to the sequences using the `utils.spark_utils.py::create_sequence_data_with_att`. 
+
 
 ### 5. Fine-tune CEHR-BERT for a given task
 
@@ -141,7 +145,11 @@ mkdir -p $evaluation_dir
 
 ## 6. Evaluate the pipeline (pretrain + finetuning)
 
-NB: Don't forget to create the train and test data for the finetuning task (section 4.)
+**prerequisite**: Don't forget to create the train and test data for the finetuning task (section 4.)
+
+**Goal:** Pre-train the transformer then transfer it on a downstream task in one script. The scripts for the downstream tasks that I am studying (LOS, prognosis) are in the [`evaluations`]() folder.
+
+**Command on EDS:**
 
 ```console
 local_cohort_dir="Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
@@ -165,8 +173,8 @@ evaluation_dir=$mySourcePath$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_hospital_split
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_prognosis_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_hospital_split
 ```
-The training percentage is set to 1 and can be changed directly in the eds_full_pipeline.py script which run 5 random seed run by default.
+The training percentage is set to 1 and can be changed directly in the `eds_prognosis_pipeline.py` script which run 5 random seed run by default.
 
-On APHP JupyterHub, I put a dedicated sbatch file with these instructions in the cehr-bert folder.
+On APHP JupyterHub, I put dedicated sbatch files with these instructions in the cehr-bert folder.
