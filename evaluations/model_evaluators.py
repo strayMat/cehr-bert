@@ -430,10 +430,12 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         time_stamps = dataset_.dates
         ages = dataset_.ages
         visit_concept_orders = dataset_.visit_concept_orders
-        labels = dataset_.label
+
         # suppose that the label is a list of chapters
         if self._target_label is not None:
             labels = labels.apply(lambda x: self._target_label in x).astype(int)
+        else:
+            labels = dataset_.label
         padded_token_ides = post_pad_pre_truncate(
             token_ids,
             self._tokenizer.get_unused_token_id(),

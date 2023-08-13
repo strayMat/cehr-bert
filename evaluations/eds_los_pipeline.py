@@ -122,33 +122,27 @@ def main(pipeline_config):
             np.hstack(effective_train_dataset["label"].values)
         )
 
-        targets_to_run = [
-            t_ for t_ in ICD10_CHAPTERS if t_ in available_targets_counts
-        ]
-        for target_ in targets_to_run:
-            logging.getLogger().info(
-                f"Finetuning for 🎯={target_}, 🌱={random_seed_}"
-            )
-            bert_model = BertLstmModelEvaluator(
-                bert_model_path=evaluation_pretrain_model_path,
-                dataset=effective_train_dataset,
-                evaluation_folder=pipeline_config.evaluation_folder,
-                num_of_folds=1,  # no incidence for our transfer evaluation choice.
-                is_transfer_learning=False,
-                # this does nothing for train_transfer function, but is given to
-                # the metric logger.
-                training_percentage=pretrain_percentage_,
-                max_seq_length=pipeline_config.max_seq_length,
-                batch_size=pipeline_config.evaluation_batch_size,
-                epochs=pipeline_config.evaluation_epochs,
-                tokenizer_path=bert_tokenizer_path,
-                is_temporal=False,
-                sequence_model_name=pipeline_config.sequence_model_name
-                + f"__target_{target_}",
-                target_label=target_,
-                random_seed=random_seed_,
-                split_group=pipeline_config.split_group,
-            ).train_transfer(test_dataset=test_dataset)
+        logging.getLogger().info(f"Finetuning for 🎯=LOS, 🌱={random_seed_}, {pretrain_percentage_} percents of train")
+        bert_model = BertLstmModelEvaluator(
+            bert_model_path=evaluation_pretrain_model_path,
+            dataset=effective_train_dataset,
+            evaluation_folder=pipeline_config.evaluation_folder,
+            num_of_folds=1,  # no incidence for our transfer evaluation choice.
+            is_transfer_learning=False,
+            # this does nothing for train_transfer function, but is given to
+            # the metric logger.
+            training_percentage=pretrain_percentage_,
+            max_seq_length=pipeline_config.max_seq_length,
+            batch_size=pipeline_config.evaluation_batch_size,
+            epochs=pipeline_config.evaluation_epochs,
+            tokenizer_path=bert_tokenizer_path,
+            is_temporal=False,
+            sequence_model_name=pipeline_config.sequence_model_name
+            + f"__target_LOS",
+            target_label=None,# only used for multi-classification
+            random_seed=random_seed_,
+            split_group=pipeline_config.split_group,
+        ).train_transfer(test_dataset=test_dataset)
 
 
 def create_parse_args_pipeline_evaluation():
@@ -217,5 +211,6 @@ if __name__ == "__main__":
     # "-sdt, --sequence_model_data_path_test"
     # "-smn ,--sequence_model_name"
     # "-ef, --evaluation_folder"
+    # don-t forget to set -ut to True to use time embeddings
     pipeline_config = create_parse_args_pipeline_evaluation()
     main(pipeline_config=pipeline_config)
