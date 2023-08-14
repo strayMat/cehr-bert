@@ -44,6 +44,7 @@ def create_cohort_from_eds_eventCohort_dir(
     spark = SparkSession.builder.appName(
         f"Generate {cohort_name}"
     ).getOrCreate()
+    spark.conf.set("setting spark.driver.memory", "16g")
     # extract the events the input folder containing the events parquet.
     # The events should be only the one in the observation period.
     event = spark.read.parquet(str(input_folder_path / "event.parquet"))

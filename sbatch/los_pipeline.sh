@@ -15,7 +15,7 @@ cd '/export/home/cse210038/Matthieu/cehr-bert/'
 
 
 # This script launches a multi-output-classification problem by finetuning one model for each binary target in the cehr_bert_finetunique_sequences_train.label column.
-local_cohort_dir="~/Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017_2022__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+local_cohort_dir="Matthieu/medical_embeddings_transfer/data/complete_hospitalization_los__age_min_18__dates_2017_2022__task__length_of_stay_categorical@3/"
 
 ## copie des data en local vers le ssd
 scratch=/data/scratch
