@@ -45,7 +45,9 @@ def create_cohort_from_eds_eventCohort_dir(
         f"Generate {cohort_name}"
     ).getOrCreate()
     spark.conf.set("setting spark.driver.memory", "16g")
-    spark.conf.set("spark.sql.autoBroadcastJoinThreshold", -1)
+    spark.conf.set(
+        "spark.sql.autoBroadcastJoinThreshold", -1
+    )  # necessary for big cohorts (~30K patients)
 
     # extract the events the input folder containing the events parquet.
     # The events should be only the one in the observation period.

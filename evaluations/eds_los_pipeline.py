@@ -22,7 +22,7 @@ from trainers.train_bert_only import (
 from utils.model_utils import set_seed
 
 GRID_RANDOM_SEED = list(range(0, 5))
-GRID_PERCENTAGE = [0.02]  # [0.02, 0.1, 0.5, 1]
+GRID_PERCENTAGE = [0.1, 0.25, 0.5, 0.9, 1]  # [0.02, 0.1, 0.5, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
@@ -122,7 +122,9 @@ def main(pipeline_config):
             np.hstack(effective_train_dataset["label"].values)
         )
 
-        logging.getLogger().info(f"Finetuning for 🎯=LOS, 🌱={random_seed_}, {pretrain_percentage_} percents of train")
+        logging.getLogger().info(
+            f"Finetuning for 🎯=LOS, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
+        )
         bert_model = BertLstmModelEvaluator(
             bert_model_path=evaluation_pretrain_model_path,
             dataset=effective_train_dataset,
@@ -139,7 +141,7 @@ def main(pipeline_config):
             is_temporal=False,
             sequence_model_name=pipeline_config.sequence_model_name
             + f"__target_LOS",
-            target_label=None,# only used for multi-classification
+            target_label=None,  # only used for multi-classification
             random_seed=random_seed_,
             split_group=pipeline_config.split_group,
         ).train_transfer(test_dataset=test_dataset)
