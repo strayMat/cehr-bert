@@ -187,8 +187,8 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             gss.get_n_splits(train_val_ix)
             groups = inputs.pop(self._split_group)
             print(self._split_group)
-            print(groups)
-            print(train_val_ix)
+            print(groups.isna().sum())
+            print(train_val_ix.isna().sum())
             train, val = next(iter(gss.split(train_val_ix, groups=groups)))
         else:
             train, val = train_test_split(
