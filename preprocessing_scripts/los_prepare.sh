@@ -1,8 +1,8 @@
 
 # Prepare data for pretraining (to OMOP CDM)
-medem_dir="$HOME/Matthieu/medical_embeddings_transfer/"
+medem_dir="$HOME/Matthieu/medical_embeddings_transfer"
 cohort_dir="$medem_dir/data/complete_hospitalization_los__age_min_18__dates_2017_2022__task__length_of_stay_categorical@3/"
-/export/home/cse210038/.user_conda/miniconda/envs/event2vec-py310/bin/python $medem_dir/scripts/experiences/cehr_bert_prepare_train_dataset.py --cohort_name "los"
+/export/home/cse210038/.user_conda/miniconda/envs/event2vec-py310/bin/python $medem_dir/scripts/experiences/cehr_bert_prepare_pretrain_dataset.py --cohort_name "los"
 
 # Create pretraining sequences from OMOP CDM (to TF compatible)
 ## By default spark is looking into the hdfs files, so I have to prepend "file://" to the path
