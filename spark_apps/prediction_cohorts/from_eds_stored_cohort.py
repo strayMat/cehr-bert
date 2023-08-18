@@ -22,6 +22,7 @@ def create_cohort_from_eds_eventCohort_dir(
     output_folder: str,
     train_test_split_file_path: str = None,
     split_group: str = None,
+    supplementary_statics_cols: List[str] = None,
 ):
     """From a [EventCohort](), create the sequence of events necessary for cerh-bert
     fine tuning prediction tasks.
@@ -74,7 +75,10 @@ def create_cohort_from_eds_eventCohort_dir(
                 how="inner",
             )
             split_cohort_sequence_target = create_cohort_from_eds_eventCohort(
-                person=split_person, event=split_event, split_group=split_group
+                person=split_person,
+                event=split_event,
+                split_group=split_group,
+                supplementary_statics_cols=supplementary_statics_cols,
             )
             split_cohort_sequence_target.write.mode("overwrite").parquet(
                 str(output_folder) + f"_{split_name}"
@@ -82,7 +86,9 @@ def create_cohort_from_eds_eventCohort_dir(
 
     else:
         cohort_sequence_target = create_cohort_from_eds_eventCohort(
-            person=person, event=event
+            person=person,
+            event=event,
+            supplementary_statics_cols=supplementary_statics_cols,
         )
         cohort_sequence_target.write.mode("overwrite").parquet(
             str(output_folder)
