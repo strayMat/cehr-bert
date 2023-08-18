@@ -442,7 +442,9 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
 
         # suppose that the label is a list of chapters
         if self._target_label is not None:
-            labels = labels.apply(lambda x: self._target_label in x).astype(int)
+            labels = dataset_.label.apply(
+                lambda x: self._target_label in x
+            ).astype(int)
         else:
             labels = dataset_.label
         padded_token_ides = post_pad_pre_truncate(
