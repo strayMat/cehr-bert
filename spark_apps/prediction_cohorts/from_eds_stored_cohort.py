@@ -207,15 +207,15 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-isc",
-        "--index_stay_chapter",
-        dest="index_stay_chapter",
+        "--index_stay_chapters",
+        dest="index_stay_chapters",
         action="store_true",
         help="Whether to include the index stay chapter in the static features.",
         default=False,
     )
     args = parser.parse_args()
-    if args.index_stay_chapter:
-        supplementary_statics_cols = ["index_stay_chapter"]
+    if args.index_stay_chapters:
+        supplementary_statics_cols = ["index_stay_chapters"]
     else:
         supplementary_statics_cols = None
     create_cohort_from_eds_eventCohort_dir(
