@@ -196,6 +196,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             train, val = train_test_split(
                 train_val_ix, random_state=self._random_seed, train_size=0.75
             )
+        breakpoint()
         training_input = {k: v[train] for k, v in inputs.items()}
         val_input = {k: v[val] for k, v in inputs.items()}
 
