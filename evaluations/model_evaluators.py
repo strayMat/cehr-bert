@@ -98,6 +98,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         target_label: str = None,
         random_seed: int = 42,
         split_group: str = None,
+        index_visit_chapters: bool = False,
         *args,
         **kwargs,
     ):
@@ -129,6 +130,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
                 self.get_logger().warning(
                     f"Target label {self._target_label} has prevalence {train_prevalence} in training set."
                 )
+        self._index_visit_chapters = index_visit_chapters
 
     def train_model(self, training_data: Dataset, val_data: Dataset):
         """
@@ -381,7 +383,6 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         self._bert_model_path = bert_model_path
         self._tokenizer = pickle.load(open(tokenizer_path, "rb"))
         self._is_temporal = is_temporal
-        self._index_visit_chapters = kwargs.get("index_visit_chapters", False)
         self.get_logger().info(
             f"max_seq_length: {max_seq_length}\n"
             f"vanilla_bert_model_path: {bert_model_path}\n"
