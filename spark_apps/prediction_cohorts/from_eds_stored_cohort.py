@@ -205,10 +205,23 @@ if __name__ == "__main__":
         help="The column name for a split_group present in the train test split to be stored in the final sequences. This can be used for cross-validation.",
         default=None,
     )
+    parser.add_argument(
+        "-isc",
+        "--index_stay_chapter",
+        dest="index_stay_chapter",
+        action="store_true",
+        help="Whether to include the index stay chapter in the static features.",
+        default=False,
+    )
     args = parser.parse_args()
+    if args.index_stay_chapter:
+        supplementary_statics_cols = ["index_stay_chapter"]
+    else:
+        supplementary_statics_cols = None
     create_cohort_from_eds_eventCohort_dir(
         input_folder=args.input_folder,
         output_folder=args.output_folder,
         train_test_split_file_path=args.train_test_split_file_path,
         split_group=args.split_group,
+        supplementary_statics_cols=supplementary_statics_cols,
     )
