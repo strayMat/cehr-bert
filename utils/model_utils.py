@@ -177,7 +177,7 @@ def compute_binary_metrics(
         "f1-score": [f1_score],
         "pr_auc": [pr_auc],
         "roc_auc": [roc_auc],
-        "bier_score_loss": [brier_score],
+        "brier_score_loss": [brier_score],
     }
     for k, v in kwargs.items():
         data_metrics[k] = [v]
