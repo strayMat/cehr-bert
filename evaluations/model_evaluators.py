@@ -202,7 +202,6 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         tf.print(f"{self}: The train size is {len(train)}")
         tf.print(f"{self}: The val size is {len(val)}")
         tf.print(f"{self}: The test size is {len(test_labels)}")
-        breakpoint()
         training_set = (
             tf.data.Dataset.from_tensor_slices((training_input, labels[train]))
             .cache()
@@ -480,7 +479,7 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         if self._index_stay_chapters:
             inputs["index_stay_chapters"] = np.expand_dims(
                 dataset_.index_stay_chapters, axis=-1
-            )
+            ).tolist()
         if "split_group" in dataset_.columns:
             inputs["split_group"] = dataset_["split_group"]
         return inputs, labels

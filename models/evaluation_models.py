@@ -196,7 +196,7 @@ def create_vanilla_bert_bi_lstm_model(
 
     if index_stay_chapters:
         index_stay_chapters_input = tf.keras.layers.Input(
-            name="index_stay_chapters", shape=(21,)
+            name="index_stay_chapters", shape=(1,22)
         )
         index_stay_chapters_batch_norm_layer = (
             tf.keras.layers.BatchNormalization(
