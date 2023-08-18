@@ -98,7 +98,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         target_label: str = None,
         random_seed: int = 42,
         split_group: str = None,
-        index_visit_chapters: bool = False,
+        index_stay_chapters: bool = False,
         *args,
         **kwargs,
     ):
@@ -112,7 +112,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._epochs = epochs
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
-        self._index_visit_chapters = index_visit_chapters
+        self._index_stay_chapters = index_stay_chapters
 
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
         self._split_group = split_group
@@ -408,14 +408,14 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
                 model = create_model_fn(
                     self._max_seq_length,
                     self._bert_model_path,
-                    self._index_visit_chapters,
+                    self._index_stay_chapters,
                 )
             except ValueError as e:
                 self.get_logger().exception(e)
                 model = create_model_fn(
                     self._max_seq_length,
                     self._bert_model_path,
-                    self._index_visit_chapters,
+                    self._index_stay_chapters,
                 )
 
             model.compile(
@@ -477,9 +477,9 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             "ages": padded_ages,
             "visit_concept_orders": padded_visit_concept_orders,
         }
-        if self._index_visit_chapters:
-            inputs["index_visit_chapters"] = np.expand_dims(
-                dataset_.index_visit_chapters, axis=-1
+        if self._index_stay_chapters:
+            inputs["index_stay_chapters"] = np.expand_dims(
+                dataset_.index_stay_chapters, axis=-1
             )
         if "split_group" in dataset_.columns:
             inputs["split_group"] = dataset_["split_group"]
