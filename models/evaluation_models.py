@@ -184,7 +184,7 @@ def create_sliding_bert_model(
 
 # eds-modified: to take into account index stay icd10 chapters
 def create_vanilla_bert_bi_lstm_model(
-    max_seq_length, vanilla_bert_model_path, index_stay_chapters: bool = True
+    max_seq_length, vanilla_bert_model_path, index_stay_chapters: bool = False
 ):
     age_of_visit_input = tf.keras.layers.Input(name="age", shape=(1,))
 
@@ -266,7 +266,7 @@ def create_vanilla_bert_bi_lstm_model(
     output = output_layer(next_input)
 
     model_inputs = bert_inputs + [age_of_visit_input]
-    if index_stay_chapters_input:
+    if index_stay_chapters:
         model_inputs = model_inputs + [index_stay_chapters_input]
     lstm_with_vanilla_bert = Model(
         inputs=model_inputs,

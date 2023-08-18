@@ -36,4 +36,4 @@ evaluation_dir=$mySourcePath$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_prognosis_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pr2_pipeline
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_prognosis_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pr2_pipeline -ut
