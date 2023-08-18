@@ -196,7 +196,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             train, val = train_test_split(
                 train_val_ix, random_state=self._random_seed, train_size=0.75
             )
-        breakpoint()
+
         training_input = {k: v[train] for k, v in inputs.items()}
         val_input = {k: v[val] for k, v in inputs.items()}
 
@@ -478,9 +478,9 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             "visit_concept_orders": padded_visit_concept_orders,
         }
         if self._index_stay_chapters:
-            inputs["index_stay_chapters"] = np.expand_dims(
-                dataset_.index_stay_chapters, axis=-1
-            ).tolist()
+            inputs["index_stay_chapters"] = np.vstack(
+                dataset_.index_stay_chapters,
+            )
         if "split_group" in dataset_.columns:
             inputs["split_group"] = dataset_["split_group"]
         return inputs, labels
