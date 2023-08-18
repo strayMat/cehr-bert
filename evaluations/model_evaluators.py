@@ -112,6 +112,8 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         self._epochs = epochs
         self._batch_size = batch_size
         self._sequence_model_name = sequence_model_name
+        self._index_visit_chapters = index_visit_chapters
+
         super(SequenceModelEvaluator, self).__init__(*args, **kwargs)
         self._split_group = split_group
         # depracated ?
@@ -130,7 +132,6 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
                 self.get_logger().warning(
                     f"Target label {self._target_label} has prevalence {train_prevalence} in training set."
                 )
-        self._index_visit_chapters = index_visit_chapters
 
     def train_model(self, training_data: Dataset, val_data: Dataset):
         """
