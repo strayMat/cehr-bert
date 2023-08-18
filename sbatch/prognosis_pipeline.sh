@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=cehr-bert-finetune
-#SBATCH --time 48:00:00
+#SBATCH --time 72:00:00
 #SBATCH --gres=gpu:t4:1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=5
@@ -15,7 +15,7 @@ cd '/export/home/cse210038/Matthieu/cehr-bert/'
 
 
 # This script launches a multi-output-classification problem by finetuning one model for each binary target in the cehr_bert_finetunique_sequences_train.label column.
-local_cohort_dir="Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017-01-01_2022-06-01__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
+local_cohort_dir="Matthieu/medical_embeddings_transfer/data/icd10_prognosis__age_min_18__dates_2017_2022__task__prognosis@cim10lvl_1__rs_0__min_prev_0.01/"
 
 ## copie des data en local vers le ssd
 scratch=/data/scratch
@@ -36,4 +36,4 @@ evaluation_dir=$mySourcePath$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_full_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pr2_pipeline
+/export/home/cse210038/.user_conda/miniconda/envs/cehr_bert/bin/python evaluations/eds_prognosis_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pr2_pipeline

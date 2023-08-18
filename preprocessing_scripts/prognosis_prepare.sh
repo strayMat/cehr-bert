@@ -14,7 +14,7 @@ PYTHONPATH=./: spark-submit $cehr_bert_dir/spark_apps/generate_training_data.py 
 
 # Generate the finetuning sequences 
 input_dir="file://"$cohort_dir
-output_dir=$input_dir"cehr_bert_finetuning_sequences"
+output_dir=$input_dir"/cehr_bert_finetuning_sequences"
 train_test_split_folder=$input_dir"/dataset_split.parquet" 
 conda activate cehr_bert
 python $cehr_bert_dir/spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "hospital_split" --index_stay_chapters  
