@@ -90,7 +90,10 @@ def create_cohort_from_eds_eventCohort_dir(
 
 
 def create_cohort_from_eds_eventCohort(
-    person: DataFrame, event: DataFrame, split_group: str = None
+    person: DataFrame,
+    event: DataFrame,
+    split_group: str = None,
+    supplementary_statics_cols: List[str] = None,
 ) -> DataFrame:
     """
     From person and event, return the sequences for cehr-bert inputs.
@@ -118,6 +121,8 @@ def create_cohort_from_eds_eventCohort(
         F.col(COLNAME_OUTCOME).alias("label"),
         "index_date",
     ]
+    if supplementary_statics_cols is not None:
+        statics_cols += supplementary_statics_cols
     if split_group is not None:
         statics_cols += [F.col(split_group).alias("split_group")]
     target_w_statics = (

@@ -381,6 +381,7 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
         self._bert_model_path = bert_model_path
         self._tokenizer = pickle.load(open(tokenizer_path, "rb"))
         self._is_temporal = is_temporal
+        self._index_visit_chapters = kwargs.get("index_visit_chapters", False)
         self.get_logger().info(
             f"max_seq_length: {max_seq_length}\n"
             f"vanilla_bert_model_path: {bert_model_path}\n"
@@ -403,12 +404,16 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             )
             try:
                 model = create_model_fn(
-                    self._max_seq_length, self._bert_model_path
+                    self._max_seq_length,
+                    self._bert_model_path,
+                    self._index_visit_chapters,
                 )
             except ValueError as e:
                 self.get_logger().exception(e)
                 model = create_model_fn(
-                    self._max_seq_length, self._bert_model_path
+                    self._max_seq_length,
+                    self._bert_model_path,
+                    self._index_visit_chapters,
                 )
 
             model.compile(
@@ -468,6 +473,10 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
             "ages": padded_ages,
             "visit_concept_orders": padded_visit_concept_orders,
         }
+        if self._index_visit_chapters:
+            inputs["index_visit_chapters"] = np.expand_dims(
+                dataset_.index_visit_chapters, axis=-1
+            )
         if "split_group" in dataset_.columns:
             inputs["split_group"] = dataset_["split_group"]
         return inputs, labels

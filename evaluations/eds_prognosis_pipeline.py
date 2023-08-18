@@ -44,7 +44,7 @@ ICD10_CHAPTERS = [
     "17",
     "8",
 ]
-#ICD10_CHAPTERS = ["2"]
+# ICD10_CHAPTERS = ["2"]
 
 GRID_RANDOM_SEED = list(range(0, 5))
 GRID_PERCENTAGE = [1]  # [0.02, 0.1, 0.5, 1]
@@ -173,6 +173,7 @@ def main(pipeline_config):
                 target_label=target_,
                 random_seed=random_seed_,
                 split_group=pipeline_config.split_group,
+                index_visit_chapters=pipeline_config.index_visit_chapters,
             ).train_transfer(test_dataset=test_dataset)
 
 
@@ -231,6 +232,7 @@ def create_parse_args_pipeline_evaluation():
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
     # add split group for train, val as most visited hospital
     setattr(pipeline_config, "split_group", "split_group")
+    setattr(pipeline_config, "index_visit_chapters", True)
     return pipeline_config
 
 
