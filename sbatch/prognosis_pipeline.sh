@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=5
 #SBATCH --partition gpuT4
-#SBATCH --mem=24G
+#SBATCH --mem=36G
 #SBATCH --container-image /scratch/images/sparkhadoop.sqsh  --container-mounts=/export/home/$USER:/export/home/$USER,/export/home/share:/export/home/share,/data/scratch/$USER:/data/scratch/$USER --container-mount-home --container-writable --container-workdir=/
 #SBATCH --output=logs/slurm-%j-stdout.log
 #SBATCH --error=logs/slurm-%j-stderr.log
