@@ -46,7 +46,7 @@ ICD10_CHAPTERS = [
 ]
 # ICD10_CHAPTERS = ["2"]
 
-GRID_RANDOM_SEED = list(range(0, 5))
+GRID_RANDOM_SEED = list(range(2, 3))
 GRID_PERCENTAGE = [0.5, 0.9, 0.99]  # [0.02, 0.1, 0.5, 1]
 
 PARAMETER_GRID = ParameterGrid(
