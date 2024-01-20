@@ -14,10 +14,21 @@ Goal: Provide OMOP tables as parquet files that can be ingested by CEHR-BERT
 preprocessing to be transformed into sequences appropriate for the transformer
 model. 
 
-I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_train_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence). It uses polars and some codes I am using for the other experiments.
+I wrote a [script to restrict the database to the train id of a given cohort](https://gitlab.inria.fr/soda/medical_embeddings_transfer/-/blob/main/scripts/experiences/cehr_bert_prepare_pretrain_dataset.py) and copy in a dedicated folder the domain tables used by cehrt_bert after joining them to a cohort of interest: (procedure_occurrence, condition_occurrence, drug_exposure_administration, person, visit_occurrence). It uses polars and some codes I am using for the other experiments.
+
+
 
 
 ### 2. Generate training data for CEHR-BERT: create sequences from OMOP tables
+
+**Python environment:** For the following steps, you need to have a conda env with python3.7 and the requirements for the cehr-bert project (go the main readme for details). Install the cehr-bert package then the requirements : 
+
+```console
+conda create -n cehr_bert python=3.7
+conda activate cehr_bert
+pip install -e .
+pip install -r requirements.txt
+```
 
 
 **Goal:** Generate sequences appropriate for the transformer model from the OMOP
@@ -40,6 +51,8 @@ Checking what does `/spark_apps/generate_training_data.py::main`
 - `create_sequence_data_with_att` creates the sequences : 
     - I had to make sure the datetime are well converted from string to datetime. 
     - I had to change the columns of interest for getting the good codes (`utils/spark_utils.py::DOMAIN_KEY_FIELDS`).
+
+**Remarks on I2B2/MACE:**
 
 
 ## 3. Pre-train CEHR-BERT
@@ -65,15 +78,15 @@ mkdir -p $output_dir
 **Remarks:**  
 
 - CPU: should work as is.
-- GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I add to install tensorflow-gpu, but once installed, it worked like a charm.
+- GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I had to install tensorflow-gpu, but once installed, it worked like a charm.
 
 ## Fine-tune on a downstream task
 
 ### 4. Generate cehr-bert compatible data for the prediction task
 
-**Prerequisite:** Having a cohort with a defined task.
+**Goal:** Create train and test sequence data for a specific prediction task.
 
-- you should obtain a folder with two dataframes:
+**Prerequisite:** Having a cohort with a defined task. You should have a folder with two dataframes:
  - a person : static informations (sex, ) and task specific information (at least columns: `followup_start` and `y`).
  - an event dataframe: events only present in the observation period for the predictive task
 
