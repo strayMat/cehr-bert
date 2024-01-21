@@ -160,7 +160,7 @@ mkdir -p $evaluation_dir
 
 **prerequisite**: Don't forget to create the train and test data for the finetuning task (section 4.)
 
-**Goal:** Pre-train the transformer then transfer it on a downstream task in one script. The scripts for the downstream tasks that I am studying (LOS, prognosis) are in the [`evaluations`]() folder.
+**Goal:** Pre-train the transformer then transfer it on a downstream task in one script. The scripts for the downstream tasks that I am studying (LOS, prognosis, MACE) are in the [`evaluations`](evaluations) folder.
 
 **Command on EDS:**
 
@@ -190,4 +190,4 @@ mkdir -p $pretrained_dir
 ```
 The training percentage is set to 1 and can be changed directly in the `eds_prognosis_pipeline.py` script which run 5 random seed run by default.
 
-On APHP JupyterHub, I put dedicated sbatch files with these instructions in the cehr-bert folder.
+The [sbatch](sbatch) folder contains sbatch files with these instructions to leverage slurm and GPUs. It is tailored to the slurm configuration of the APHP. 
