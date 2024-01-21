@@ -41,4 +41,4 @@ train_test_split_folder=$input_dir"/hospital_split.parquet"
 
 PYTHONPATH=./: spark-submit --driver-memory=12g --executor-memory 16g spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "most_visited_hospital"
 ```
-
+Remarque: I had to rewrite the parquet files with Pandas so that Spark could read them. This seems to be due to different datetimes between polars==0.18.15 and spark.
