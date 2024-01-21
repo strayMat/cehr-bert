@@ -21,7 +21,7 @@ from trainers.train_bert_only import (
 from utils.model_utils import set_seed
 
 GRID_RANDOM_SEED = list(range(0, 5))
-GRID_PERCENTAGE = [0.1]#, 0.25, 0.5, 0.9, 1]
+GRID_PERCENTAGE = [1]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {

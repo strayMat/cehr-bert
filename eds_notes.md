@@ -78,7 +78,14 @@ mkdir -p $output_dir
 **Remarks:**  
 
 - CPU: should work as is.
-- GPU: The conda environment seems to miss conda `Could not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64`. I am trying to install cuda10.2 and see what it says. I had to install tensorflow-gpu, but once installed, it worked like a charm.
+- GPU: The tensorflow librairy seems to require a specific configuration for gpu libraries (cuda and cudnn):  `CoCould not load dynamic library 'libcudnn.so.7'; dlerror: libcudnn.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /usr/local/nvidia/lib:/usr/local/nvidia/lib64. Then another error on 
+libcupti.so.10.1. 
+
+In principle, the configuration for tf==2.3, cuda=10.2 and cudnn=7.0 shoudl work together. It simply a matter of finding the right version of the libraries that are working together.
+- `python3 -m pip install --upgrade setuptools # (if not, i have and unusually high memory consumption when installing grpcio)`
+- `pip install tensorflow-gpu==2.3`
+- `conda install -c anaconda cudatoolkit=10.1.243 cudnn=7.6.5   # the important part - versions must match`
+
 
 ## Fine-tune on a downstream task
 
