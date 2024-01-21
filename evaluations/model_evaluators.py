@@ -190,7 +190,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             gss.get_n_splits(train_val_ix)
             groups = inputs.pop(self._split_group)
             # strange remaining nan in group...
-            groups[np.isnan(groups)] = 0.0
+            groups[pd.isna(groups)] = 0.0
             train, val = next(iter(gss.split(train_val_ix, groups=groups)))
         else:
             train, val = train_test_split(
