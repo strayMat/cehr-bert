@@ -42,6 +42,10 @@ class AbstractModel(ABC):
 
     def get_model_history_folder(self):
         return create_folder_if_not_exist(self.get_model_folder(), "history")
+    
+    # eds-modified:
+    def get_model_probabilities_folder(self):
+        return create_folder_if_not_exist(self.get_model_folder(), "probabilities")
 
     @classmethod
     def get_logger(cls):

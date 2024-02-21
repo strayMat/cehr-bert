@@ -158,11 +158,16 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
 
     # eds-modified: allow to transfer to an unseen and fixed (even during
     # pretraining) test set.
-    def train_transfer(self, test_dataset):
+    # eds-modified: allow to save the probabilities for the test set.
+    def train_transfer(self, test_dataset, save_probabilities=False):
         "Train on a training set, transfer to an external test set."
         train, val, test = self.get_train_val_test(test_dataset=test_dataset)
         self._model = self._create_model()
         self.train_model(train, val)
+        if save_probabilities:
+            probabilities_folder = self.get_model_probabilities_folder()
+        else:
+            probabilities_folder = None
         compute_binary_metrics(
             self._model,
             test,
@@ -172,6 +177,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
                 "target_label": self._target_label,
                 "training_percentage": self._training_percentage,
             },
+            probabilities_folder=probabilities_folder
         )
 
     # eds-modified: get the train, val and test sets for an unseen and fixed (even during

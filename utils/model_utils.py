@@ -115,16 +115,17 @@ def tokenize_concepts(
         pickle.dump(tokenizer, open(tokenizer_path, "wb"))
     return tokenizer
 
-
 @log_function_decorator
 def compute_binary_metrics(
     model,
     test_data: Union[Dataset, Tuple[np.ndarray, np.ndarray]],
     metrics_folder,
+    probabilities_folder=None,
     **kwargs,
 ):
     """
     Compute Recall, Precision, F1-score and PR-AUC for the test data
+    # eds-modified: allow to save the probabilities in a parquet file
 
     :param model:
     :param test_data:
@@ -185,6 +186,10 @@ def compute_binary_metrics(
     pd.DataFrame(data_metrics).to_parquet(
         os.path.join(metrics_folder, f"{current_time}.parquet")
     )
+    if probabilities_folder:
+        probabilities_df = pd.DataFrame(
+            {"probabilities": probabilities, "labels": labels})
+        probabilities_df.to_parquet(os.path.join(probabilities_folder, f"probabilities_{current_time}.parquet"))
 
 
 def save_training_history(history: Dict, history_folder):
