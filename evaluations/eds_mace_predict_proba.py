@@ -28,7 +28,7 @@ def main(config: argparse.Namespace):
     pretrained_path = pretrained_sequence_dir / pretrained_model_name
     ## Not used since the checkpoint of finetuned model is not loadable due to two layers with the same name (age).
     #finetuned_path = path2cohort / "evaluation_train_val_split/CEHR_BERT_512_pipeline__target_MACE/CEHR_BERT_512_pipeline__target_MACE.h5"
-    
+
     # Load sequences
     train_dataset = pd.read_parquet(path2cohort / "cehr_bert_sequences", p.parquet_data_path).sample(
                     frac=1.0, random_state=random_seed
@@ -47,7 +47,7 @@ def main(config: argparse.Namespace):
                 training_percentage=1,
                 max_seq_length=512,
                 batch_size=32,
-                epochs=10,
+                epochs=1,
                 tokenizer_path=str(pretrained_sequence_dir/p.tokenizer_path),
                 is_temporal=False,
                 sequence_model_name="CEHR_BERT_512_pipeline"
