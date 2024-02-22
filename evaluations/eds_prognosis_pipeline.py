@@ -162,7 +162,7 @@ def main(pipeline_config):
                 is_transfer_learning=False,
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
-                training_percentage=pretrain_percentage_,
+                training_data_ratio=pretrain_percentage_,
                 max_seq_length=pipeline_config.max_seq_length,
                 batch_size=pipeline_config.evaluation_batch_size,
                 epochs=pipeline_config.evaluation_epochs,

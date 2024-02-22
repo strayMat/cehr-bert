@@ -37,7 +37,7 @@ class AbstractModelEvaluator(AbstractModel):
         evaluation_folder,
         num_of_folds,
         is_transfer_learning: bool = False,
-        training_percentage: float = 1.0,
+        training_data_ratio: float = 1.0,
         learning_rate: float = 1e-4,
         *args,
         **kwargs,
@@ -45,13 +45,13 @@ class AbstractModelEvaluator(AbstractModel):
         self._dataset = copy.copy(dataset)
         self._evaluation_folder = evaluation_folder
         self._num_of_folds = num_of_folds
-        self._training_percentage = min(training_percentage, 1.0)
+        self._training_data_ratio = min(training_data_ratio, 1.0)
         self._is_transfer_learning = is_transfer_learning
         self._learning_rate = learning_rate
 
         if is_transfer_learning:
             extension = "transfer_learning_{:.2f}".format(
-                self._training_percentage
+                self._training_data_ratio
             ).replace(".", "_")
             self._evaluation_folder = os.path.join(
                 self._evaluation_folder, extension
@@ -61,7 +61,7 @@ class AbstractModelEvaluator(AbstractModel):
             f"evaluation_folder: {self._evaluation_folder}\n"
             f"num_of_folds: {self._num_of_folds}\n"
             f"is_transfer_learning {self._is_transfer_learning}\n"
-            f"training_percentage: {self._training_percentage}\n"
+            f"training_percentage: {self._training_data_ratio}\n"
         )
 
         super().__init__(*args, **kwargs)
@@ -175,7 +175,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             **{
                 "random_seed": self._random_seed,
                 "target_label": self._target_label,
-                "training_percentage": self._training_percentage,
+                "training_percentage": self._training_data_ratio,
             },
             probabilities_folder=probabilities_folder
         )
@@ -239,7 +239,7 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
             )
 
             if self._is_transfer_learning:
-                size = int(len(train) * self._training_percentage)
+                size = int(len(train) * self._training_data_ratio)
                 train = np.random.choice(train, size, replace=False)
 
             training_input = {k: v[train] for k, v in inputs.items()}
@@ -655,7 +655,7 @@ class BaselineModelEvaluator(AbstractModelEvaluator, ABC):
             )
             train = np.concatenate([train, val])
             if self._is_transfer_learning:
-                size = int(len(train) * self._training_percentage)
+                size = int(len(train) * self._training_data_ratio)
                 train = np.random.choice(train, size, replace=False)
             train_data = (
                 csr_matrix(hstack([inputs[train], age[train]])),

@@ -44,7 +44,7 @@ def main(config: argparse.Namespace):
                 is_transfer_learning=False,
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
-                training_percentage=1,
+                training_data_ratio=1,
                 max_seq_length=512,
                 batch_size=32,
                 epochs=1,
