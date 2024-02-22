@@ -30,7 +30,7 @@ def main(config: argparse.Namespace):
     #finetuned_path = path2cohort / "evaluation_train_val_split/CEHR_BERT_512_pipeline__target_MACE/CEHR_BERT_512_pipeline__target_MACE.h5"
 
     # Load sequences
-    train_dataset = pd.read_parquet(path2cohort / "cehr_bert_sequences", p.parquet_data_path).sample(
+    train_dataset = pd.read_parquet(path2cohort / "cehr_bert_sequences"/ p.parquet_data_path).sample(
                     frac=1.0, random_state=random_seed
                 )
     test_dataset = pd.read_parquet(path2cohort/"cehr_bert_finetuning_sequences_external_test")
