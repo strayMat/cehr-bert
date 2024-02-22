@@ -1,9 +1,7 @@
 import argparse
 from evaluations.model_evaluators import BertLstmModelEvaluator
-from evaluations.eds_mace_pipeline import create_parse_args_base_bert
 from pathlib import Path
 import spark_apps.parameters as p
-import os
 import pandas as pd
 
 """
@@ -30,7 +28,7 @@ def main(config: argparse.Namespace):
     #finetuned_path = path2cohort / "evaluation_train_val_split/CEHR_BERT_512_pipeline__target_MACE/CEHR_BERT_512_pipeline__target_MACE.h5"
 
     # Load sequences
-    train_dataset = pd.read_parquet(path2cohort / "cehr_bert_sequences"/ p.parquet_data_path).sample(
+    train_dataset = pd.read_parquet(path2cohort / "cehr_bert_finetuning_sequences_train").sample(
                     frac=1.0, random_state=random_seed
                 )
     test_dataset = pd.read_parquet(path2cohort/"cehr_bert_finetuning_sequences_external_test")
