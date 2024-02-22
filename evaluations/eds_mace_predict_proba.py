@@ -29,7 +29,7 @@ def main(config: argparse.Namespace):
 
     # Load sequences
     train_dataset = pd.read_parquet(path2cohort / "cehr_bert_finetuning_sequences_train").sample(
-                    frac=1.0, random_state=random_seed
+                    frac=0.05, random_state=random_seed
                 )
     test_dataset = pd.read_parquet(path2cohort/"cehr_bert_finetuning_sequences_external_test")
 
@@ -42,7 +42,7 @@ def main(config: argparse.Namespace):
                 is_transfer_learning=False,
                 # this does nothing for train_transfer function, but is given to
                 # the metric logger.
-                training_data_ratio=1,
+                training_data_ratio=1, # no effect for transfer
                 max_seq_length=512,
                 batch_size=32,
                 epochs=1,
