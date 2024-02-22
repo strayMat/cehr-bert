@@ -29,7 +29,7 @@ def main(config: argparse.Namespace):
 
     # Load sequences
     train_dataset = pd.read_parquet(path2cohort / "cehr_bert_finetuning_sequences_train").sample(
-                    frac=0.05, random_state=random_seed
+                    frac=1, random_state=random_seed
                 ).reset_index()
     test_dataset = pd.read_parquet(path2cohort/"cehr_bert_finetuning_sequences_external_test")
 
@@ -44,8 +44,8 @@ def main(config: argparse.Namespace):
                 # the metric logger.
                 training_data_ratio=1, # no effect for transfer
                 max_seq_length=512,
-                batch_size=32,
-                epochs=1,
+                batch_size=64,
+                epochs=10,
                 tokenizer_path=str(pretrained_sequence_dir/p.tokenizer_path),
                 is_temporal=False,
                 sequence_model_name="CEHR_BERT_512_pipeline"

@@ -187,9 +187,8 @@ def compute_binary_metrics(
         os.path.join(metrics_folder, f"{current_time}.parquet")
     )
     if probabilities_folder:
-        breakpoint()
         probabilities_df = pd.DataFrame(
-            {"probabilities": np.asarray(probabilities), "labels": labels})
+            {"probabilities": np.asarray(probabilities).reshape(-1), "labels": labels})
         probabilities_df.to_parquet(os.path.join(probabilities_folder, f"probabilities_{current_time}.parquet"))
 
 
