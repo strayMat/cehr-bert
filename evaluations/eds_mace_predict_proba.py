@@ -30,7 +30,7 @@ def main(config: argparse.Namespace):
     # Load sequences
     train_dataset = pd.read_parquet(path2cohort / "cehr_bert_finetuning_sequences_train").sample(
                     frac=0.05, random_state=random_seed
-                )
+                ).reset_index()
     test_dataset = pd.read_parquet(path2cohort/"cehr_bert_finetuning_sequences_external_test")
 
     # instantiation of the model with the Cehr-bert library
