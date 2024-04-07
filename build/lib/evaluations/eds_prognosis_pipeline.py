@@ -12,6 +12,7 @@ from config.parse_args import create_parse_args_base_bert
 from evaluations.evaluation import (
     SEQUENCE_MODEL,
     VANILLA_BERT_LSTM,
+    create_evaluation_args,
 )
 from evaluations.model_evaluators import BertLstmModelEvaluator
 from trainers.train_bert_only import (
@@ -20,8 +21,33 @@ from trainers.train_bert_only import (
 )
 from utils.model_utils import set_seed
 
-GRID_RANDOM_SEED = list(range(0, 2))
-GRID_PERCENTAGE = [0.05, 0.25, 0.5, 0.75]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
+ICD10_CHAPTERS = [
+    "21",
+    "9",
+    "4",
+    "18",
+    "2",
+    "5",
+    "6",
+    "11",
+    "14",
+    "10",
+    "13",
+    "19",
+    "3",
+    "1",
+    "15",
+    "12",
+    "20",
+    "7",
+    "22",
+    "17",
+    "8",
+]
+# ICD10_CHAPTERS = ["2"]
+
+GRID_RANDOM_SEED = [4]
+GRID_PERCENTAGE = [0.02, 0.1]  # [0.5, 0.9, 0.99]
 
 PARAMETER_GRID = ParameterGrid(
     {
@@ -117,31 +143,38 @@ def main(pipeline_config):
         test_dataset = pd.read_parquet(
             pipeline_config.sequence_model_data_path_test
         )
-        
-
-        logging.getLogger().info(
-            f"Finetuning for 🎯=MACE, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
+        available_targets_counts = np.unique(
+            np.hstack(effective_train_dataset["label"].values)
         )
-        bert_model = BertLstmModelEvaluator(
-            bert_model_path=evaluation_pretrain_model_path,
-            dataset=effective_train_dataset,
-            evaluation_folder=pipeline_config.evaluation_folder,
-            num_of_folds=1,  # no incidence for our transfer evaluation choice.
-            is_transfer_learning=False,
-            # this does nothing for train_transfer function, but is given to
-            # the metric logger.
-            training_data_ratio=pretrain_percentage_,
-            max_seq_length=pipeline_config.max_seq_length,
-            batch_size=pipeline_config.evaluation_batch_size,
-            epochs=pipeline_config.evaluation_epochs,
-            tokenizer_path=bert_tokenizer_path,
-            is_temporal=False,
-            sequence_model_name=pipeline_config.sequence_model_name
-            + f"__target_MACE",
-            target_label=None,  # only used for multi-classification
-            random_seed=random_seed_,
-            split_group=pipeline_config.split_group,
-        ).train_transfer(test_dataset=test_dataset)
+
+        targets_to_run = [
+            t_ for t_ in ICD10_CHAPTERS if t_ in available_targets_counts
+        ]
+        for target_ in targets_to_run:
+            logging.getLogger().info(
+                f"Finetuning for 🎯={target_}, 🌱={random_seed_}"
+            )
+            bert_model = BertLstmModelEvaluator(
+                bert_model_path=evaluation_pretrain_model_path,
+                dataset=effective_train_dataset,
+                evaluation_folder=pipeline_config.evaluation_folder,
+                num_of_folds=1,  # no incidence for our transfer evaluation choice.
+                is_transfer_learning=False,
+                # this does nothing for train_transfer function, but is given to
+                # the metric logger.
+                training_percentage=pretrain_percentage_,
+                max_seq_length=pipeline_config.max_seq_length,
+                batch_size=pipeline_config.evaluation_batch_size,
+                epochs=pipeline_config.evaluation_epochs,
+                tokenizer_path=bert_tokenizer_path,
+                is_temporal=False,
+                sequence_model_name=pipeline_config.sequence_model_name
+                + f"__target_{target_}",
+                target_label=target_,
+                random_seed=random_seed_,
+                split_group=pipeline_config.split_group,
+                index_stay_chapters=pipeline_config.index_stay_chapters,
+            ).train_transfer(test_dataset=test_dataset)
 
 
 def create_parse_args_pipeline_evaluation():
@@ -199,6 +232,7 @@ def create_parse_args_pipeline_evaluation():
     setattr(pipeline_config, "model_evaluators", VANILLA_BERT_LSTM)
     # add split group for train, val as most visited hospital
     setattr(pipeline_config, "split_group", "split_group")
+    setattr(pipeline_config, "index_stay_chapters", True)
     return pipeline_config
 
 
@@ -210,6 +244,5 @@ if __name__ == "__main__":
     # "-sdt, --sequence_model_data_path_test"
     # "-smn ,--sequence_model_name"
     # "-ef, --evaluation_folder"
-    # don-t forget to set -ut to True to use time embeddings
     pipeline_config = create_parse_args_pipeline_evaluation()
     main(pipeline_config=pipeline_config)

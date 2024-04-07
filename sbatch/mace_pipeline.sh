@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=los_cbert
-#SBATCH --time 48:00:00
+#SBATCH --job-name=mace_cbert
+#SBATCH --time 72:00:00
 #SBATCH --gres=gpu:t4:1
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=5
 #SBATCH --partition gpuT4
-#SBATCH --mem=24G
+#SBATCH --mem=54G
 #SBATCH --container-image /scratch/images/sparkhadoop.sqsh  --container-mounts=/export/home/$USER:/export/home/$USER,/export/home/share:/export/home/share,/data/scratch/$USER:/data/scratch/$USER --container-mount-home --container-writable --container-workdir=/
 #SBATCH --output=logs/slurm-%j-stdout.log
 #SBATCH --error=logs/slurm-%j-stderr.log
@@ -36,4 +36,4 @@ evaluation_dir=$mySourcePath$myOutPut
 mkdir -p $evaluation_dir 
 mkdir -p $pretrained_dir
 
-/export/home/cse210037/.user_conda/miniconda/envs/cehr-bert/bin/python evaluations/eds_mace_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline -ut
+/export/home/cse210037/.user_conda/miniconda/envs/cehr-bert/bin/python evaluations/eds_mace_pipeline.py -i $pretrain_sequence -o $pretrained_dir -sd $train_sequence_dir -sdt $test_sequence_dir -ef $evaluation_dir -smn CEHR_BERT_512_pipeline -ut 

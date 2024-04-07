@@ -12,6 +12,7 @@ from config.parse_args import create_parse_args_base_bert
 from evaluations.evaluation import (
     SEQUENCE_MODEL,
     VANILLA_BERT_LSTM,
+    create_evaluation_args,
 )
 from evaluations.model_evaluators import BertLstmModelEvaluator
 from trainers.train_bert_only import (
@@ -20,8 +21,8 @@ from trainers.train_bert_only import (
 )
 from utils.model_utils import set_seed
 
-GRID_RANDOM_SEED = list(range(0, 2))
-GRID_PERCENTAGE = [0.05, 0.25, 0.5, 0.75]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
+GRID_RANDOM_SEED = list(range(0, 5))
+GRID_PERCENTAGE = [0.1, 0.25, 0.5, 0.9, 1]  # [0.02, 0.1, 0.5, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
@@ -117,10 +118,12 @@ def main(pipeline_config):
         test_dataset = pd.read_parquet(
             pipeline_config.sequence_model_data_path_test
         )
-        
+        available_targets_counts = np.unique(
+            np.hstack(effective_train_dataset["label"].values)
+        )
 
         logging.getLogger().info(
-            f"Finetuning for 🎯=MACE, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
+            f"Finetuning for 🎯=LOS, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
         )
         bert_model = BertLstmModelEvaluator(
             bert_model_path=evaluation_pretrain_model_path,
@@ -130,14 +133,14 @@ def main(pipeline_config):
             is_transfer_learning=False,
             # this does nothing for train_transfer function, but is given to
             # the metric logger.
-            training_data_ratio=pretrain_percentage_,
+            training_percentage=pretrain_percentage_,
             max_seq_length=pipeline_config.max_seq_length,
             batch_size=pipeline_config.evaluation_batch_size,
             epochs=pipeline_config.evaluation_epochs,
             tokenizer_path=bert_tokenizer_path,
             is_temporal=False,
             sequence_model_name=pipeline_config.sequence_model_name
-            + f"__target_MACE",
+            + f"__target_LOS",
             target_label=None,  # only used for multi-classification
             random_seed=random_seed_,
             split_group=pipeline_config.split_group,
