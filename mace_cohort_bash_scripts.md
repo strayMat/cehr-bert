@@ -40,9 +40,9 @@ mkdir -p $output_dir
 ```console
 input_dir="file:///export/home/cse210037/Matthieu/medical_embeddings_transfer/data/mace__age_min_18__dates_2018_2020__task__MACE@360__index_visit_random/"
 output_dir=$input_dir"cehr_bert_finetuning_sequences"
-train_test_split_folder=$input_dir"/hospital_split.parquet" 
+train_test_split_folder=$input_dir"/dataset_split.parquet" 
 
-PYTHONPATH=./: spark-submit --driver-memory=12g --executor-memory 16g spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "most_visited_hospital"
+PYTHONPATH=./: spark-submit --driver-memory=12g --executor-memory 16g spark_apps/prediction_cohorts/from_eds_stored_cohort.py -i $input_dir -o $output_dir -s $train_test_split_folder -sg "hospital_split"
 ```
 Remarque: I had to rewrite the parquet files with Pandas so that Spark could read them. This seems to be due to different datetimes between polars==0.18.15 and spark.
 

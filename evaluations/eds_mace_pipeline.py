@@ -141,7 +141,7 @@ def main(pipeline_config):
             target_label=None,  # only used for multi-classification
             random_seed=random_seed_,
             split_group=pipeline_config.split_group,
-        ).train_transfer(test_dataset=test_dataset)
+        ).train_transfer(test_dataset=test_dataset, save_probabilities=pipeline_config.save_probabilities)
 
 
 def create_parse_args_pipeline_evaluation():
@@ -174,6 +174,13 @@ def create_parse_args_pipeline_evaluation():
         action="store",
         required=True,
     )
+    pretrain_args.add_argument(
+        "-pr",
+        "--save_probabilities",
+        dest="save_probabilities",
+        action="store_true",
+        required=False,
+    )
     # for debugging
     pretrain_args.add_argument(
         "-sp",
@@ -182,6 +189,7 @@ def create_parse_args_pipeline_evaluation():
         action="store_true",
         required=False,
     )
+
     pipeline_config = pretrain_args.parse_args()
     # Force the pretrain config to be the same as the one from [cehr_bert
     # README](https://github.com/cumc-dbmi/cehr-bert#3-pre-train-cehr-bert).
