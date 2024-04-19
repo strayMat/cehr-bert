@@ -389,7 +389,6 @@ class BertLstmModelEvaluator(SequenceModelEvaluator):
     ):
         self._max_seq_length = max_seq_length
         self._bert_model_path = bert_model_path
-        breakpoint()
         self._tokenizer = pickle.load(open(tokenizer_path, "rb"))
         self._is_temporal = is_temporal
         self.get_logger().info(
