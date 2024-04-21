@@ -169,8 +169,8 @@ def compute_binary_metrics(
     pr_auc = metrics.auc(recalls, precisions)
     roc_auc = metrics.roc_auc_score(labels, probabilities)
     brier_score = metrics.brier_score_loss(labels, probabilities)
-    test_prevalence = labels.mean()
-    n_test = labels.shape[0]
+    test_prevalence = np.mean(labels)
+    n_test = len(labels)
 
     current_time = datetime.datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
     data_metrics = {
