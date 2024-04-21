@@ -124,7 +124,6 @@ def main(pipeline_config):
             pipeline_config.sequence_model_data_path_test
         )
         
-        breakpoint()
         logging.getLogger().info(
             f"Finetuning for 🎯=MACE, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
         )
