@@ -23,7 +23,7 @@ from utils.model_utils import set_seed
 import tensorflow as tf
 
 GRID_RANDOM_SEED = list(range(2, 5))
-GRID_PERCENTAGE = [0.05]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
+GRID_PERCENTAGE = [0.005]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
 
 PARAMETER_GRID = ParameterGrid(
     {
@@ -36,7 +36,7 @@ PARAMETER_GRID = ParameterGrid(
 def main(pipeline_config):
     for run_config in PARAMETER_GRID:
         
-        # try solving the GPU oom (wo success)
+        # try solving the GPU oom
         os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
         tf.keras.backend.clear_session()
         # set paths
@@ -124,6 +124,7 @@ def main(pipeline_config):
             pipeline_config.sequence_model_data_path_test
         )
         
+
         logging.getLogger().info(
             f"Finetuning for 🎯=MACE, 🌱={random_seed_}, {pretrain_percentage_} percents of train"
         )
@@ -138,7 +139,7 @@ def main(pipeline_config):
             training_data_ratio=pretrain_percentage_,
             max_seq_length=pipeline_config.max_seq_length,
             batch_size=pipeline_config.evaluation_batch_size,
-            epochs=1,#pipeline_config.evaluation_epochs,
+            epochs=1,
             tokenizer_path=bert_tokenizer_path,
             is_temporal=False,
             sequence_model_name=pipeline_config.sequence_model_name

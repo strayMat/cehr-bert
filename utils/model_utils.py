@@ -146,14 +146,11 @@ def compute_binary_metrics(
             )
 
         if isinstance(model, Model):
-            breakpoint()
-            #prob = model.predict(x)
-            prob = y
+            prob = model.predict(x)
         elif isinstance(
             model, (LogisticRegression, XGBClassifier, GridSearchCV)
         ):
             prob = model.predict_proba(x)[:, 1]
-            prob = y
         else:
             raise TypeError(f"Unknown type for the model {type(model)}")
 
@@ -162,6 +159,11 @@ def compute_binary_metrics(
     validate_folder(metrics_folder)
 
     probabilities, labels = run_model()
+
+    logging.getLogger().info(
+            f"Length of labels {len(labels)} / probabilities {len(probabilities)}"
+        )
+
     precisions, recalls, _ = metrics.precision_recall_curve(
         labels, np.asarray(probabilities)
     )
@@ -197,7 +199,7 @@ def compute_binary_metrics(
         probabilities_df = pd.DataFrame(
             {"probabilities": np.asarray(probabilities).reshape(-1), "labels": labels})
         probabilities_df.to_parquet(os.path.join(probabilities_folder, f"probabilities_{current_time}.parquet"))
-    breakpoint()
+
 
 def save_training_history(history: Dict, history_folder):
     """
