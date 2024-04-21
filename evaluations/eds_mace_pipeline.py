@@ -20,6 +20,8 @@ from trainers.train_bert_only import (
 )
 from utils.model_utils import set_seed
 
+import tensorflow as tf
+
 GRID_RANDOM_SEED = list(range(0, 2))
 GRID_PERCENTAGE = [0.05]#, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 1]
 
@@ -33,6 +35,8 @@ PARAMETER_GRID = ParameterGrid(
 
 def main(pipeline_config):
     for run_config in PARAMETER_GRID:
+
+        tf.keras.backend.clear_session()
         # set paths
         random_seed_ = run_config["random_seed"]
         pretrain_percentage_ = run_config["train_percentage"]
