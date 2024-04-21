@@ -147,11 +147,12 @@ def compute_binary_metrics(
 
         if isinstance(model, Model):
             breakpoint()
-            prob = model.predict(x)
+            #prob = model.predict(x)
+            prob = y
         elif isinstance(
             model, (LogisticRegression, XGBClassifier, GridSearchCV)
         ):
-            #prob = model.predict_proba(x)[:, 1]
+            prob = model.predict_proba(x)[:, 1]
             prob = y
         else:
             raise TypeError(f"Unknown type for the model {type(model)}")
