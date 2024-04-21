@@ -146,6 +146,7 @@ def compute_binary_metrics(
             )
 
         if isinstance(model, Model):
+            breakpoint()
             prob = model.predict(x)
         elif isinstance(
             model, (LogisticRegression, XGBClassifier, GridSearchCV)
@@ -194,7 +195,7 @@ def compute_binary_metrics(
         probabilities_df = pd.DataFrame(
             {"probabilities": np.asarray(probabilities).reshape(-1), "labels": labels})
         probabilities_df.to_parquet(os.path.join(probabilities_folder, f"probabilities_{current_time}.parquet"))
-
+    breakpoint()
 
 def save_training_history(history: Dict, history_folder):
     """
