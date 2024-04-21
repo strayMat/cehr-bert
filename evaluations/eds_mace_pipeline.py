@@ -35,7 +35,9 @@ PARAMETER_GRID = ParameterGrid(
 
 def main(pipeline_config):
     for run_config in PARAMETER_GRID:
-
+        
+        # try solving the GPU oom
+        os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
         tf.keras.backend.clear_session()
         # set paths
         random_seed_ = run_config["random_seed"]
