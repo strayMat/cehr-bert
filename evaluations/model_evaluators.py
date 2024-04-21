@@ -164,7 +164,10 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
         train, val, test = self.get_train_val_test(test_dataset=test_dataset)
         self._model = self._create_model()
         self.train_model(train, val)
-        print(f"Length of test {test_dataset.shape[0]}")
+        logging.getLogger().info(
+            f"Length of test {test_dataset.shape[0]}"
+        )
+
         if save_probabilities:
             probabilities_folder = self.get_model_probabilities_folder()
         else:
