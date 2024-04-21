@@ -3,6 +3,7 @@
 #SBATCH --time 72:00:00
 #SBATCH --gres=gpu:t4:1
 #SBATCH --nodes=1
+#SBATCH --nodelist=bbs-edsg28-p012
 #SBATCH --cpus-per-task=2
 #SBATCH --partition gpuT4
 #SBATCH --mem=32G
