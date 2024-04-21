@@ -169,6 +169,8 @@ def compute_binary_metrics(
     pr_auc = metrics.auc(recalls, precisions)
     roc_auc = metrics.roc_auc_score(labels, probabilities)
     brier_score = metrics.brier_score_loss(labels, probabilities)
+    test_prevalence = labels.mean()
+    n_test = labels.shape[0]
 
     current_time = datetime.datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
     data_metrics = {
@@ -179,6 +181,8 @@ def compute_binary_metrics(
         "pr_auc": [pr_auc],
         "roc_auc": [roc_auc],
         "brier_score_loss": [brier_score],
+        "test_prevalence": [test_prevalence],
+        "n_test": [n_test]
     }
     for k, v in kwargs.items():
         data_metrics[k] = [v]

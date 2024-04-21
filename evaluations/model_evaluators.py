@@ -162,7 +162,6 @@ class SequenceModelEvaluator(AbstractModelEvaluator, ABC):
     def train_transfer(self, test_dataset, save_probabilities=False):
         "Train on a training set, transfer to an external test set."
         train, val, test = self.get_train_val_test(test_dataset=test_dataset)
-        breakpoint()
         self._model = self._create_model()
         self.train_model(train, val)
         if save_probabilities:

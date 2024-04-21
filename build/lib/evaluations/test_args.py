@@ -4,7 +4,6 @@ from evaluations.eds_prognosis_pipeline import (
 
 
 def main(pipeline_config):
-    breakpoint()
     print(pipeline_config)
 
 
